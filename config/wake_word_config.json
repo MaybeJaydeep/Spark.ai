@@ -1,0 +1,15 @@
+{
+  "wake_words": [
+    "hey assistant",
+    "computer",
+    "wake up",
+    "hello assistant"
+  ],
+  "confidence_threshold": 0.7,
+  "sample_rate": 16000,
+  "chunk_size": 1024,
+  "channels": 1,
+  "buffer_duration": 2.0,
+  "vad_aggressiveness": 2,
+  "audio_format": 16
+}
