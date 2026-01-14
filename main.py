@@ -14,6 +14,7 @@ from typing import Optional
 
 from wake_word.listener import WakeWordDetector, ActivationEvent
 from speech.stt import SpeechToText, RecognitionResult
+from nlp.intent_parser import IntentParser, Intent
 
 
 class AIAssistant:
@@ -22,6 +23,7 @@ class AIAssistant:
     def __init__(self):
         self.wake_word_detector: Optional[WakeWordDetector] = None
         self.stt: Optional[SpeechToText] = None
+        self.intent_parser: Optional[IntentParser] = None
         self.is_running = False
         
         # Setup logging
@@ -56,7 +58,21 @@ class AIAssistant:
             result = self.stt.listen_once(timeout=5.0, phrase_time_limit=10.0)
             if result and result.success:
                 print(f"📝 You said: '{result.text}'")
-                # TODO: Pass to NLP for intent parsing
+                
+                # Parse intent
+                if self.intent_parser:
+                    intent = self.intent_parser.parse(result.text)
+                    print(f"🎯 Intent: {intent.type.value} (confidence: {intent.confidence:.2f})")
+                    
+                    if intent.entities:
+                        print(f"📦 Entities:")
+                        for entity in intent.entities:
+                            print(f"   - {entity.type}: '{entity.value}'")
+                    
+                    # TODO: Execute action based on intent
+                    self.execute_intent(intent)
+                else:
+                    print("(Intent parser not initialized)")
             else:
                 print("❌ Could not understand the command")
         else:
@@ -104,9 +120,36 @@ class AIAssistant:
             self.logger.error(f"❌ Error initializing speech-to-text: {e}")
             return False
     
+    def initialize_intent_parser(self) -> bool:
+        """Initialize intent parser"""
+        try:
+            self.logger.info("Initializing intent parser...")
+            
+            self.intent_parser = IntentParser()
+            
+            self.logger.info("✅ Intent parser initialized successfully")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"❌ Error initializing intent parser: {e}")
+            return False
+    
+    def execute_intent(self, intent: Intent) -> None:
+        """Execute action based on parsed intent"""
+        print(f"\n🚀 Executing: {intent.type.value}")
+        
+        # TODO: Implement actual action execution
+        # This will be handled by the actions module
+        print("   (Action execution not yet implemented)")
+        print("-" * 60)
+    
     def run(self) -> None:
         """Main application loop"""
         self.logger.info("🚀 Starting AI Assistant...")
+        
+        # Initialize intent parser
+        if not self.initialize_intent_parser():
+            self.logger.warning("⚠️  Intent parser initialization failed, continuing without it")
         
         # Initialize speech-to-text
         if not self.initialize_speech_to_text():
