@@ -9,6 +9,7 @@ This allows testing without microphone/audio hardware.
 import logging
 from nlp.intent_parser import IntentParser, IntentType
 from actions.apps import AppController
+from actions.system import SystemController
 
 def main():
     """Main test loop"""
@@ -31,6 +32,7 @@ def main():
     # Initialize components
     parser = IntentParser()
     app_controller = AppController()
+    system_controller = SystemController()
     
     while True:
         try:
@@ -59,7 +61,7 @@ def main():
             
             # Execute the action
             print(f"\n🚀 Executing action...")
-            execute_action(intent, app_controller)
+            execute_action(intent, app_controller, system_controller)
             
             print("-"*60)
             
@@ -71,7 +73,7 @@ def main():
             logging.exception("Error processing command")
 
 
-def execute_action(intent, app_controller):
+def execute_action(intent, app_controller, system_controller):
     """Execute action based on intent"""
     
     if intent.type == IntentType.OPEN_APP:
@@ -115,8 +117,11 @@ def execute_action(intent, app_controller):
     
     elif intent.type == IntentType.TAKE_SCREENSHOT:
         print(f"   Taking screenshot...")
-        # TODO: Implement screenshot functionality
-        print(f"   ⚠️  Screenshot functionality not yet implemented")
+        success, filepath = system_controller.take_screenshot()
+        if success:
+            print(f"   ✅ Screenshot saved to: {filepath}")
+        else:
+            print(f"   ❌ Failed to take screenshot")
     
     elif intent.type == IntentType.GET_TIME:
         from datetime import datetime
@@ -125,14 +130,23 @@ def execute_action(intent, app_controller):
     
     elif intent.type == IntentType.VOLUME_UP:
         print(f"   🔊 Increasing volume...")
-        print(f"   ⚠️  Volume control not yet implemented")
+        success = system_controller.volume_up(10)
+        if success:
+            print(f"   ✅ Volume increased!")
+        else:
+            print(f"   ❌ Failed to increase volume")
     
     elif intent.type == IntentType.VOLUME_DOWN:
         print(f"   🔉 Decreasing volume...")
-        print(f"   ⚠️  Volume control not yet implemented")
+        success = system_controller.volume_down(10)
+        if success:
+            print(f"   ✅ Volume decreased!")
+        else:
+            print(f"   ❌ Failed to decrease volume")
     
     elif intent.type == IntentType.SHUTDOWN:
         print(f"   ⚠️  Shutdown command detected (not executing for safety)")
+        print(f"   💡 To actually shutdown, modify the code to pass confirm=False")
     
     elif intent.type == IntentType.UNKNOWN:
         print(f"   ❓ I didn't understand that command")
