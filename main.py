@@ -13,6 +13,7 @@ import sys
 from typing import Optional
 
 from wake_word.listener import WakeWordDetector, ActivationEvent
+from speech.stt import SpeechToText, RecognitionResult
 
 
 class AIAssistant:
@@ -20,6 +21,7 @@ class AIAssistant:
     
     def __init__(self):
         self.wake_word_detector: Optional[WakeWordDetector] = None
+        self.stt: Optional[SpeechToText] = None
         self.is_running = False
         
         # Setup logging
@@ -46,10 +48,19 @@ class AIAssistant:
             f"(confidence: {event.confidence:.2f}) at {event.timestamp}"
         )
         
-        # TODO: Integrate with speech-to-text and NLP processing
         print(f"\n✨ Assistant activated by '{event.wake_word}'!")
         print("🔊 Listening for your command...")
-        print("(This is where speech-to-text would take over)\n")
+        
+        # Use STT to capture the command
+        if self.stt:
+            result = self.stt.listen_once(timeout=5.0, phrase_time_limit=10.0)
+            if result and result.success:
+                print(f"📝 You said: '{result.text}'")
+                # TODO: Pass to NLP for intent parsing
+            else:
+                print("❌ Could not understand the command")
+        else:
+            print("(STT not initialized)\n")
     
     def initialize_wake_word_detection(self) -> bool:
         """Initialize wake word detection system"""
@@ -74,9 +85,32 @@ class AIAssistant:
             self.logger.error(f"❌ Error initializing wake word detection: {e}")
             return False
     
+    def initialize_speech_to_text(self) -> bool:
+        """Initialize speech-to-text system"""
+        try:
+            self.logger.info("Initializing speech-to-text...")
+            
+            # Create STT instance
+            self.stt = SpeechToText()
+            
+            # Adjust for ambient noise
+            self.logger.info("Adjusting for ambient noise...")
+            self.stt.adjust_for_ambient_noise(duration=1.0)
+            
+            self.logger.info("✅ Speech-to-text initialized successfully")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"❌ Error initializing speech-to-text: {e}")
+            return False
+    
     def run(self) -> None:
         """Main application loop"""
         self.logger.info("🚀 Starting AI Assistant...")
+        
+        # Initialize speech-to-text
+        if not self.initialize_speech_to_text():
+            self.logger.warning("⚠️  STT initialization failed, continuing without it")
         
         # Initialize wake word detection
         if not self.initialize_wake_word_detection():
@@ -142,6 +176,11 @@ class AIAssistant:
         if self.wake_word_detector:
             self.wake_word_detector.stop()
             self.logger.info("✅ Wake word detection stopped")
+        
+        # Stop STT if in continuous mode
+        if self.stt and self.stt.is_listening:
+            self.stt.stop_continuous_listening()
+            self.logger.info("✅ Speech-to-text stopped")
         
         self.logger.info("👋 AI Assistant shutdown complete")
 
