@@ -18,6 +18,13 @@ try:
 except ImportError:
     sr = None
 
+# Try sounddevice as alternative to pyaudio
+try:
+    from speech.stt_sounddevice import SoundDeviceSTT
+    SOUNDDEVICE_AVAILABLE = True
+except ImportError:
+    SOUNDDEVICE_AVAILABLE = False
+
 
 class RecognitionEngine(Enum):
     """Available speech recognition engines"""
@@ -83,8 +90,16 @@ class SpeechToText:
         # Setup logging
         self.logger = logging.getLogger(__name__)
         
-        # Initialize recognizer
-        self._initialize_recognizer()
+        # Try sounddevice first, fallback to pyaudio
+        if SOUNDDEVICE_AVAILABLE:
+            self.logger.info("Using sounddevice for audio input")
+            self.sounddevice_stt = SoundDeviceSTT()
+            self.use_sounddevice = True
+        else:
+            self.logger.info("Using pyaudio for audio input")
+            self.use_sounddevice = False
+            # Initialize recognizer
+            self._initialize_recognizer()
     
     def _initialize_recognizer(self) -> bool:
         """Initialize speech recognizer"""
@@ -129,10 +144,14 @@ class SpeechToText:
     
     def adjust_for_ambient_noise(self, duration: Optional[float] = None) -> bool:
         """Adjust recognizer for ambient noise"""
+        duration = duration or self.config.ambient_duration
+        
+        # Use sounddevice if available
+        if self.use_sounddevice and hasattr(self, 'sounddevice_stt'):
+            return self.sounddevice_stt.adjust_for_ambient_noise(duration)
+        
         if not self.recognizer:
             return False
-        
-        duration = duration or self.config.ambient_duration
         
         try:
             with sr.Microphone() as source:
@@ -157,6 +176,11 @@ class SpeechToText:
         Returns:
             RecognitionResult or None if failed
         """
+        # Use sounddevice if available
+        if self.use_sounddevice and hasattr(self, 'sounddevice_stt'):
+            phrase_time_limit = phrase_time_limit or self.config.phrase_time_limit
+            return self.sounddevice_stt.listen_once(duration=phrase_time_limit)
+        
         if not self.recognizer:
             self.logger.error("Recognizer not initialized")
             return None
