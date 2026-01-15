@@ -14,6 +14,7 @@ from typing import Optional
 
 from wake_word.listener import WakeWordDetector, ActivationEvent
 from speech.stt import SpeechToText, RecognitionResult
+from speech.stt_sounddevice import SoundDeviceSTT, SOUNDDEVICE_AVAILABLE
 from nlp.intent_parser import IntentParser, Intent
 from toc.dispatcher import CommandDispatcher
 from ui.app import AssistantUI
@@ -22,13 +23,15 @@ from ui.app import AssistantUI
 class AIAssistant:
     """Main AI Assistant application"""
     
-    def __init__(self, use_gui: bool = False):
+    def __init__(self, use_gui: bool = False, use_wake_word: bool = False):
         self.wake_word_detector: Optional[WakeWordDetector] = None
         self.stt: Optional[SpeechToText] = None
+        self.stt_sounddevice: Optional[SoundDeviceSTT] = None
         self.intent_parser: Optional[IntentParser] = None
         self.dispatcher: Optional[CommandDispatcher] = None
         self.ui: Optional[AssistantUI] = None
         self.use_gui = use_gui
+        self.use_wake_word = use_wake_word
         self.is_running = False
         
         # Setup logging
@@ -63,53 +66,57 @@ class AIAssistant:
             print("🔊 Listening for your command...")
         
         # Use STT to capture the command
-        if self.stt:
+        if self.stt_sounddevice:
+            result = self.stt_sounddevice.listen_once(duration=5.0)
+        elif self.stt:
             result = self.stt.listen_once(timeout=5.0, phrase_time_limit=10.0)
-            if result and result.success:
-                if self.ui:
-                    self.ui.log_command(result.text)
-                    self.ui.set_state("Processing command")
-                else:
-                    print(f"📝 You said: '{result.text}'")
-                
-                # Parse intent
-                if self.intent_parser:
-                    intent = self.intent_parser.parse(result.text)
-                    
-                    if self.ui:
-                        self.ui.log_intent(intent.type.value, intent.confidence)
-                    else:
-                        print(f"🎯 Intent: {intent.type.value} (confidence: {intent.confidence:.2f})")
-                    
-                    if intent.entities:
-                        if not self.ui:
-                            print(f"📦 Entities:")
-                            for entity in intent.entities:
-                                print(f"   - {entity.type}: '{entity.value}'")
-                    
-                    # Execute action using dispatcher
-                    if self.dispatcher:
-                        result = self.dispatcher.dispatch(intent)
-                        if self.ui:
-                            self.ui.log_action(result['message'], result['success'])
-                            self.ui.set_state("Listening")
-                        else:
-                            icon = '✅' if result['success'] else '❌'
-                            print(f"{icon} {result['message']}")
-                    else:
-                        self.execute_intent(intent)
-                else:
-                    if not self.ui:
-                        print("(Intent parser not initialized)")
-            else:
-                if self.ui:
-                    self.ui.log_error("Could not understand the command")
-                    self.ui.set_state("Listening")
-                else:
-                    print("❌ Could not understand the command")
         else:
             if not self.ui:
                 print("(STT not initialized)\n")
+            return
+        
+        if result and result.success:
+            if self.ui:
+                self.ui.log_command(result.text)
+                self.ui.set_state("Processing command")
+            else:
+                print(f"📝 You said: '{result.text}'")
+            
+            # Parse intent
+            if self.intent_parser:
+                intent = self.intent_parser.parse(result.text)
+                
+                if self.ui:
+                    self.ui.log_intent(intent.type.value, intent.confidence)
+                else:
+                    print(f"🎯 Intent: {intent.type.value} (confidence: {intent.confidence:.2f})")
+                
+                if intent.entities:
+                    if not self.ui:
+                        print(f"📦 Entities:")
+                        for entity in intent.entities:
+                            print(f"   - {entity.type}: '{entity.value}'")
+                
+                # Execute action using dispatcher
+                if self.dispatcher:
+                    result = self.dispatcher.dispatch(intent)
+                    if self.ui:
+                        self.ui.log_action(result['message'], result['success'])
+                        self.ui.set_state("Listening")
+                    else:
+                        icon = '✅' if result['success'] else '❌'
+                        print(f"{icon} {result['message']}")
+                else:
+                    self.execute_intent(intent)
+            else:
+                if not self.ui:
+                    print("(Intent parser not initialized)")
+        else:
+            if self.ui:
+                self.ui.log_error("Could not understand the command")
+                self.ui.set_state("Listening")
+            else:
+                print("❌ Could not understand the command")
     
     def initialize_wake_word_detection(self) -> bool:
         """Initialize wake word detection system"""
@@ -139,15 +146,27 @@ class AIAssistant:
         try:
             self.logger.info("Initializing speech-to-text...")
             
-            # Create STT instance
-            self.stt = SpeechToText()
-            
-            # Adjust for ambient noise
-            self.logger.info("Adjusting for ambient noise...")
-            self.stt.adjust_for_ambient_noise(duration=1.0)
-            
-            self.logger.info("✅ Speech-to-text initialized successfully")
-            return True
+            # Try sounddevice first
+            if SOUNDDEVICE_AVAILABLE:
+                self.logger.info("Using sounddevice for speech recognition")
+                self.stt_sounddevice = SoundDeviceSTT()
+                
+                # Adjust for ambient noise
+                self.logger.info("Adjusting for ambient noise...")
+                self.stt_sounddevice.adjust_for_ambient_noise(duration=1.0)
+                
+                self.logger.info("✅ Speech-to-text (sounddevice) initialized successfully")
+                return True
+            else:
+                # Fallback to regular STT
+                self.stt = SpeechToText()
+                
+                # Adjust for ambient noise
+                self.logger.info("Adjusting for ambient noise...")
+                self.stt.adjust_for_ambient_noise(duration=1.0)
+                
+                self.logger.info("✅ Speech-to-text initialized successfully")
+                return True
             
         except Exception as e:
             self.logger.error(f"❌ Error initializing speech-to-text: {e}")
