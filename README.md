@@ -1,6 +1,267 @@
-# AI Assistant - Wake Word Detection
+# AI Assistant - Voice-Controlled AI Assistant
 
-A Python-based AI assistant with continuous wake word detection capabilities. This project implements real-time audio monitoring to detect configurable wake words and activate the assistant hands-free.
+A complete Python-based AI voice assistant with speech recognition, natural language understanding, and system control capabilities.
+
+## 🎉 Features
+
+### ✅ Fully Working
+- **Voice Recognition** - Speak commands naturally
+- **Intent Parsing** - Understands 12+ command types
+- **App Control** - Open/close applications
+- **System Control** - Volume, screenshots, power management
+- **Web Search** - Search the internet
+- **Time Queries** - Get current time
+- **Text Mode** - Type commands (no mic needed)
+- **GUI Interface** - Visual status and feedback
+
+### 🎤 Voice Commands
+- "open firefox" - Launch applications
+- "close chrome" - Close applications
+- "search for python tutorials" - Web search
+- "what time is it" - Get current time
+- "volume up" / "volume down" - Control volume
+- "take a screenshot" - Capture screen
+- "mute" / "unmute" - Audio control
+
+## 🚀 Quick Start
+
+### Easy Launcher (Recommended)
+```bash
+python run_assistant.py
+```
+
+This shows a menu with all available modes:
+1. Voice Assistant (Interactive)
+2. Text Assistant
+3. GUI Mode
+4. Test Voice Input
+5. Check System
+
+### Direct Commands
+
+**Voice Assistant:**
+```bash
+python voice_assistant.py
+```
+
+**Text Assistant (No Microphone):**
+```bash
+python test_assistant.py
+```
+
+**GUI Mode:**
+```bash
+python main.py --gui
+```
+
+**Test Voice:**
+```bash
+python test_voice.py
+```
+
+## 📦 Installation
+
+### 1. Clone Repository
+```bash
+git clone <repository-url>
+cd AI-assistant
+```
+
+### 2. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Install Additional Packages
+```bash
+pip install sounddevice soundfile SpeechRecognition numpy pywin32
+```
+
+### 4. Test Installation
+```bash
+python test_microphone.py
+```
+
+## 🎯 Usage Modes
+
+### 1. Interactive Voice Mode
+Press ENTER, speak your command, get results.
+```bash
+python voice_assistant.py --mode interactive
+```
+
+### 2. Continuous Voice Mode
+Always listening (no button press needed).
+```bash
+python voice_assistant.py --mode continuous
+```
+
+### 3. Text Mode
+Type commands instead of speaking.
+```bash
+python test_assistant.py
+```
+
+### 4. GUI Mode
+Visual interface with status indicators.
+```bash
+python main.py --gui
+```
+
+## 🏗️ Architecture
+
+```
+AI-assistant/
+├── speech/
+│   ├── stt.py                 # Speech-to-text (PyAudio)
+│   ├── stt_sounddevice.py     # Speech-to-text (sounddevice) ✅
+│   └── stt_windows.py         # Windows Speech API fallback
+├── nlp/
+│   └── intent_parser.py       # Natural language understanding
+├── actions/
+│   ├── apps.py                # Application control
+│   └── system.py              # System operations
+├── toc/
+│   └── dispatcher.py          # Command routing
+├── ui/
+│   └── app.py                 # GUI interface
+├── wake_word/
+│   └── listener.py            # Wake word detection (needs PyAudio)
+├── voice_assistant.py         # Complete voice assistant ✅
+├── test_assistant.py          # Text-based testing ✅
+├── test_voice.py              # Voice input testing ✅
+├── run_assistant.py           # Easy launcher ✅
+└── main.py                    # Main application
+```
+
+## 🔧 Configuration
+
+### Wake Word Config
+Edit `config/wake_word_config.json`:
+```json
+{
+  "wake_words": ["hey assistant", "computer"],
+  "confidence_threshold": 0.7,
+  "sample_rate": 16000
+}
+```
+
+## 🧪 Testing
+
+### Test All Components
+```bash
+python test_microphone.py
+```
+
+### Test Voice Recognition
+```bash
+python test_voice.py
+```
+
+### Test Intent Parser
+```bash
+python nlp/intent_parser.py
+```
+
+### Test App Controller
+```bash
+python actions/apps.py
+```
+
+### Test System Controller
+```bash
+python actions/system.py
+```
+
+## 📊 Supported Intents
+
+| Intent | Example Command | Action |
+|--------|----------------|--------|
+| OPEN_APP | "open firefox" | Launch application |
+| CLOSE_APP | "close chrome" | Terminate application |
+| SEARCH | "search for cats" | Web search |
+| PLAY_MUSIC | "play music" | Open music player |
+| SET_TIMER | "timer for 5 minutes" | Set timer |
+| GET_WEATHER | "what's the weather" | Weather search |
+| GET_TIME | "what time is it" | Show current time |
+| VOLUME_UP | "volume up" | Increase volume |
+| VOLUME_DOWN | "volume down" | Decrease volume |
+| MUTE | "mute" | Mute audio |
+| TAKE_SCREENSHOT | "take a screenshot" | Capture screen |
+| SHUTDOWN | "shutdown" | Power off (with confirmation) |
+
+## 🛠️ Troubleshooting
+
+### No Microphone Detected
+```bash
+python test_microphone.py
+```
+Check if sounddevice detects your microphone.
+
+### Speech Recognition Not Working
+1. Check internet connection (uses Google Speech API)
+2. Speak clearly and close to microphone
+3. Adjust ambient noise: The system auto-adjusts on startup
+
+### Commands Not Executing
+1. Check if intent is recognized correctly
+2. Verify application names (e.g., "firefox" not "Firefox")
+3. Check system permissions
+
+## 🔐 Privacy
+
+- Speech recognition uses Google Speech API (requires internet)
+- Audio is sent to Google for processing
+- No audio is stored locally
+- For offline use, consider implementing local speech recognition
+
+## 🚧 Known Limitations
+
+- Wake word detection requires PyAudio (not available for Python 3.14 yet)
+- Speech recognition requires internet connection
+- Some system commands may need administrator privileges
+
+## 🎓 Development
+
+### Add New Intent
+1. Add intent type to `nlp/intent_parser.py`
+2. Add pattern matching rules
+3. Add handler in `toc/dispatcher.py`
+4. Implement action in `actions/` modules
+
+### Add New Action
+1. Create method in appropriate controller
+2. Add dispatcher handler
+3. Update intent parser if needed
+
+## 📝 License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch
+3. Make changes
+4. Add tests
+5. Submit pull request
+
+## 📞 Support
+
+For issues and questions:
+1. Check troubleshooting section
+2. Run system tests
+3. Create GitHub issue with details
+
+---
+
+**Status:** ✅ Fully Functional
+**Voice Input:** ✅ Working (sounddevice)
+**Text Input:** ✅ Working
+**GUI:** ✅ Working
+**Action Execution:** ✅ Working
+
+**Start using:** `python run_assistant.py`
 
 ## 🚀 Features
 
