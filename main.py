@@ -15,15 +15,20 @@ from typing import Optional
 from wake_word.listener import WakeWordDetector, ActivationEvent
 from speech.stt import SpeechToText, RecognitionResult
 from nlp.intent_parser import IntentParser, Intent
+from toc.dispatcher import CommandDispatcher
+from ui.app import AssistantUI
 
 
 class AIAssistant:
     """Main AI Assistant application"""
     
-    def __init__(self):
+    def __init__(self, use_gui: bool = False):
         self.wake_word_detector: Optional[WakeWordDetector] = None
         self.stt: Optional[SpeechToText] = None
         self.intent_parser: Optional[IntentParser] = None
+        self.dispatcher: Optional[CommandDispatcher] = None
+        self.ui: Optional[AssistantUI] = None
+        self.use_gui = use_gui
         self.is_running = False
         
         # Setup logging
@@ -50,33 +55,61 @@ class AIAssistant:
             f"(confidence: {event.confidence:.2f}) at {event.timestamp}"
         )
         
-        print(f"\n✨ Assistant activated by '{event.wake_word}'!")
-        print("🔊 Listening for your command...")
+        if self.ui:
+            self.ui.log_wake_word(event.wake_word, event.confidence)
+            self.ui.set_state("Listening for command")
+        else:
+            print(f"\n✨ Assistant activated by '{event.wake_word}'!")
+            print("🔊 Listening for your command...")
         
         # Use STT to capture the command
         if self.stt:
             result = self.stt.listen_once(timeout=5.0, phrase_time_limit=10.0)
             if result and result.success:
-                print(f"📝 You said: '{result.text}'")
+                if self.ui:
+                    self.ui.log_command(result.text)
+                    self.ui.set_state("Processing command")
+                else:
+                    print(f"📝 You said: '{result.text}'")
                 
                 # Parse intent
                 if self.intent_parser:
                     intent = self.intent_parser.parse(result.text)
-                    print(f"🎯 Intent: {intent.type.value} (confidence: {intent.confidence:.2f})")
+                    
+                    if self.ui:
+                        self.ui.log_intent(intent.type.value, intent.confidence)
+                    else:
+                        print(f"🎯 Intent: {intent.type.value} (confidence: {intent.confidence:.2f})")
                     
                     if intent.entities:
-                        print(f"📦 Entities:")
-                        for entity in intent.entities:
-                            print(f"   - {entity.type}: '{entity.value}'")
+                        if not self.ui:
+                            print(f"📦 Entities:")
+                            for entity in intent.entities:
+                                print(f"   - {entity.type}: '{entity.value}'")
                     
-                    # TODO: Execute action based on intent
-                    self.execute_intent(intent)
+                    # Execute action using dispatcher
+                    if self.dispatcher:
+                        result = self.dispatcher.dispatch(intent)
+                        if self.ui:
+                            self.ui.log_action(result['message'], result['success'])
+                            self.ui.set_state("Listening")
+                        else:
+                            icon = '✅' if result['success'] else '❌'
+                            print(f"{icon} {result['message']}")
+                    else:
+                        self.execute_intent(intent)
                 else:
-                    print("(Intent parser not initialized)")
+                    if not self.ui:
+                        print("(Intent parser not initialized)")
             else:
-                print("❌ Could not understand the command")
+                if self.ui:
+                    self.ui.log_error("Could not understand the command")
+                    self.ui.set_state("Listening")
+                else:
+                    print("❌ Could not understand the command")
         else:
-            print("(STT not initialized)\n")
+            if not self.ui:
+                print("(STT not initialized)\n")
     
     def initialize_wake_word_detection(self) -> bool:
         """Initialize wake word detection system"""
@@ -134,6 +167,20 @@ class AIAssistant:
             self.logger.error(f"❌ Error initializing intent parser: {e}")
             return False
     
+    def initialize_dispatcher(self) -> bool:
+        """Initialize command dispatcher"""
+        try:
+            self.logger.info("Initializing command dispatcher...")
+            
+            self.dispatcher = CommandDispatcher()
+            
+            self.logger.info("✅ Command dispatcher initialized successfully")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"❌ Error initializing dispatcher: {e}")
+            return False
+    
     def execute_intent(self, intent: Intent) -> None:
         """Execute action based on parsed intent"""
         print(f"\n🚀 Executing: {intent.type.value}")
@@ -146,6 +193,21 @@ class AIAssistant:
     def run(self) -> None:
         """Main application loop"""
         self.logger.info("🚀 Starting AI Assistant...")
+        
+        # Initialize UI if requested
+        if self.use_gui:
+            self.ui = AssistantUI()
+            self.ui.set_start_callback(self._start_assistant)
+            self.ui.set_stop_callback(self.shutdown)
+            self.ui.run()
+        else:
+            self._start_assistant()
+    
+    def _start_assistant(self):
+        """Start the assistant components"""
+        # Initialize dispatcher
+        if not self.initialize_dispatcher():
+            self.logger.warning("⚠️  Dispatcher initialization failed, continuing without it")
         
         # Initialize intent parser
         if not self.initialize_intent_parser():
@@ -161,6 +223,13 @@ class AIAssistant:
             return
         
         self.is_running = True
+        
+        # Update UI if present
+        if self.ui:
+            self.ui.set_wake_word_active(True)
+            self.ui.set_stt_active(True)
+            self.ui.set_state("Listening")
+            return  # UI will handle the main loop
         
         # Display status and instructions
         self._display_startup_info()
@@ -230,8 +299,14 @@ class AIAssistant:
 
 def main():
     """Main entry point"""
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='AI Voice Assistant')
+    parser.add_argument('--gui', action='store_true', help='Launch with graphical interface')
+    args = parser.parse_args()
+    
     try:
-        assistant = AIAssistant()
+        assistant = AIAssistant(use_gui=args.gui)
         assistant.run()
     except Exception as e:
         logging.error(f"Fatal error: {e}")
