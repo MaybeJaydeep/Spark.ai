@@ -12,6 +12,7 @@ import time
 from typing import Optional
 
 from speech.stt_sounddevice import SoundDeviceSTT
+from speech.tts import get_tts
 from nlp.intent_parser import IntentParser
 from toc.dispatcher import CommandDispatcher
 
@@ -24,10 +25,12 @@ class VoiceAssistant:
     into a unified voice-controlled assistant.
     """
     
-    def __init__(self):
+    def __init__(self, enable_tts: bool = False):
         self.stt: Optional[SoundDeviceSTT] = None
         self.parser: Optional[IntentParser] = None
         self.dispatcher: Optional[CommandDispatcher] = None
+        self.tts = get_tts() if enable_tts else None
+        self.enable_tts = enable_tts
         self.is_running = False
         
         # Setup logging
@@ -112,8 +115,12 @@ class VoiceAssistant:
             
             if dispatch_result['success']:
                 print(f"✅ {dispatch_result['message']}")
+                if self.enable_tts:
+                    self.tts.speak(dispatch_result['message'])
             else:
                 print(f"❌ {dispatch_result['message']}")
+                if self.enable_tts:
+                    self.tts.speak(dispatch_result['message'])
             
             return dispatch_result['success']
             
@@ -223,11 +230,16 @@ def main():
         default=5.0,
         help='Recording duration in seconds (default: 5.0)'
     )
+    parser.add_argument(
+        '--tts',
+        action='store_true',
+        help='Enable text-to-speech responses'
+    )
     
     args = parser.parse_args()
     
     # Create assistant
-    assistant = VoiceAssistant()
+    assistant = VoiceAssistant(enable_tts=args.tts)
     
     # Initialize
     if not assistant.initialize():

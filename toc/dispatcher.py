@@ -9,6 +9,7 @@ from typing import Optional
 from nlp.intent_parser import Intent, IntentType
 from actions.apps import AppController
 from actions.system import SystemController
+from actions.timer import get_timer_manager
 
 
 class CommandDispatcher:
@@ -23,6 +24,7 @@ class CommandDispatcher:
         self.logger = logging.getLogger(__name__)
         self.app_controller = AppController()
         self.system_controller = SystemController()
+        self.timer_manager = get_timer_manager()
     
     def dispatch(self, intent: Intent) -> dict:
         """
@@ -63,6 +65,15 @@ class CommandDispatcher:
             
             elif intent.type == IntentType.VOLUME_DOWN:
                 return self._handle_volume_down(intent)
+            
+            elif intent.type == IntentType.MUTE:
+                return self._handle_mute(intent)
+            
+            elif intent.type == IntentType.UNMUTE:
+                return self._handle_unmute(intent)
+            
+            elif intent.type == IntentType.LOCK_SCREEN:
+                return self._handle_lock_screen(intent)
             
             elif intent.type == IntentType.TAKE_SCREENSHOT:
                 return self._handle_screenshot(intent)
@@ -176,18 +187,68 @@ class CommandDispatcher:
         duration_entity = intent.get_entity("duration")
         unit_entity = intent.get_entity("unit")
         
-        if duration_entity and unit_entity:
-            duration = duration_entity.value
-            unit = unit_entity.value
-            message = f"Timer functionality not yet implemented (would set {duration} {unit})"
-        else:
-            message = "Timer duration not specified"
+        if not duration_entity or not unit_entity:
+            return {
+                "success": False,
+                "message": "Timer duration not specified",
+                "intent": intent.type.value
+            }
         
-        return {
-            "success": False,
-            "message": message,
-            "intent": intent.type.value
-        }
+        try:
+            duration = int(duration_entity.value)
+            unit = unit_entity.value.lower()
+            
+            # Convert to seconds
+            if "minute" in unit:
+                duration_seconds = duration * 60
+                unit_display = "minute" if duration == 1 else "minutes"
+            elif "second" in unit:
+                duration_seconds = duration
+                unit_display = "second" if duration == 1 else "seconds"
+            elif "hour" in unit:
+                duration_seconds = duration * 3600
+                unit_display = "hour" if duration == 1 else "hours"
+            else:
+                return {
+                    "success": False,
+                    "message": f"Unknown time unit: {unit}",
+                    "intent": intent.type.value
+                }
+            
+            # Create timer with notification callback
+            def on_timer_finished(timer):
+                self.logger.info(f"⏰ Timer '{timer.name}' finished!")
+                # Could add system notification here
+            
+            timer_name = f"Timer_{duration}_{unit_display}"
+            timer = self.timer_manager.create_timer(
+                duration_seconds,
+                name=timer_name,
+                callback=on_timer_finished
+            )
+            
+            return {
+                "success": True,
+                "message": f"Timer set for {duration} {unit_display}",
+                "intent": intent.type.value,
+                "duration": duration,
+                "unit": unit_display,
+                "timer_name": timer_name
+            }
+            
+        except ValueError:
+            return {
+                "success": False,
+                "message": "Invalid timer duration",
+                "intent": intent.type.value
+            }
+        except Exception as e:
+            self.logger.error(f"Error setting timer: {e}")
+            return {
+                "success": False,
+                "message": f"Failed to set timer: {str(e)}",
+                "intent": intent.type.value
+            }
     
     def _handle_get_weather(self, intent: Intent) -> dict:
         """Handle get weather intent"""
@@ -236,6 +297,36 @@ class CommandDispatcher:
         return {
             "success": success,
             "message": "Volume decreased" if success else "Failed to decrease volume",
+            "intent": intent.type.value
+        }
+    
+    def _handle_mute(self, intent: Intent) -> dict:
+        """Handle mute intent"""
+        success = self.system_controller.mute()
+        
+        return {
+            "success": success,
+            "message": "Audio muted" if success else "Failed to mute audio",
+            "intent": intent.type.value
+        }
+    
+    def _handle_unmute(self, intent: Intent) -> dict:
+        """Handle unmute intent"""
+        success = self.system_controller.unmute()
+        
+        return {
+            "success": success,
+            "message": "Audio unmuted" if success else "Failed to unmute audio",
+            "intent": intent.type.value
+        }
+    
+    def _handle_lock_screen(self, intent: Intent) -> dict:
+        """Handle lock screen intent"""
+        success = self.system_controller.lock_screen()
+        
+        return {
+            "success": success,
+            "message": "Screen locked" if success else "Failed to lock screen",
             "intent": intent.type.value
         }
     

@@ -22,6 +22,9 @@ class IntentType(Enum):
     GET_TIME = "get_time"
     VOLUME_UP = "volume_up"
     VOLUME_DOWN = "volume_down"
+    MUTE = "mute"
+    UNMUTE = "unmute"
+    LOCK_SCREEN = "lock_screen"
     SHUTDOWN = "shutdown"
     TAKE_SCREENSHOT = "take_screenshot"
     UNKNOWN = "unknown"
@@ -109,6 +112,21 @@ class IntentParser:
             IntentType.VOLUME_DOWN.value: {
                 "keywords": ["volume down", "quieter"],
                 "patterns": [r"volume\s+down"],
+                "entity_types": []
+            },
+            IntentType.MUTE.value: {
+                "keywords": ["mute", "silence"],
+                "patterns": [r"mute"],
+                "entity_types": []
+            },
+            IntentType.UNMUTE.value: {
+                "keywords": ["unmute", "sound on"],
+                "patterns": [r"unmute"],
+                "entity_types": []
+            },
+            IntentType.LOCK_SCREEN.value: {
+                "keywords": ["lock", "lock screen"],
+                "patterns": [r"lock\s+(?:the\s+)?screen"],
                 "entity_types": []
             },
             IntentType.SHUTDOWN.value: {
