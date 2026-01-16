@@ -12,8 +12,7 @@ import signal
 import sys
 from typing import Optional
 
-from wake_word.listener import WakeWordDetector, ActivationEvent
-from speech.stt import SpeechToText, RecognitionResult
+from wake_word.detector_sounddevice import SoundDeviceWakeWord, WakeWordEvent
 from speech.stt_sounddevice import SoundDeviceSTT, SOUNDDEVICE_AVAILABLE
 from nlp.intent_parser import IntentParser, Intent
 from toc.dispatcher import CommandDispatcher
@@ -24,9 +23,8 @@ class AIAssistant:
     """Main AI Assistant application"""
     
     def __init__(self, use_gui: bool = False, use_wake_word: bool = False):
-        self.wake_word_detector: Optional[WakeWordDetector] = None
-        self.stt: Optional[SpeechToText] = None
-        self.stt_sounddevice: Optional[SoundDeviceSTT] = None
+        self.wake_word_detector: Optional[SoundDeviceWakeWord] = None
+        self.stt: Optional[SoundDeviceSTT] = None
         self.intent_parser: Optional[IntentParser] = None
         self.dispatcher: Optional[CommandDispatcher] = None
         self.ui: Optional[AssistantUI] = None
@@ -51,7 +49,7 @@ class AIAssistant:
         self.shutdown()
         sys.exit(0)
     
-    def on_wake_word_detected(self, event: ActivationEvent) -> None:
+    def on_wake_word_detected(self, event: WakeWordEvent) -> None:
         """Handle wake word detection events"""
         self.logger.info(
             f"🎤 Wake word detected: '{event.wake_word}' "
@@ -66,10 +64,8 @@ class AIAssistant:
             print("🔊 Listening for your command...")
         
         # Use STT to capture the command
-        if self.stt_sounddevice:
-            result = self.stt_sounddevice.listen_once(duration=5.0)
-        elif self.stt:
-            result = self.stt.listen_once(timeout=5.0, phrase_time_limit=10.0)
+        if self.stt:
+            result = self.stt.listen_once(duration=5.0)
         else:
             if not self.ui:
                 print("(STT not initialized)\n")
@@ -124,7 +120,10 @@ class AIAssistant:
             self.logger.info("Initializing wake word detection...")
             
             # Create wake word detector
-            self.wake_word_detector = WakeWordDetector()
+            self.wake_word_detector = SoundDeviceWakeWord(
+                wake_words=["hey assistant", "computer", "wake up"],
+                chunk_duration=2.0
+            )
             
             # Register our callback
             self.wake_word_detector.add_listener(self.on_wake_word_detected)
@@ -146,27 +145,15 @@ class AIAssistant:
         try:
             self.logger.info("Initializing speech-to-text...")
             
-            # Try sounddevice first
-            if SOUNDDEVICE_AVAILABLE:
-                self.logger.info("Using sounddevice for speech recognition")
-                self.stt_sounddevice = SoundDeviceSTT()
-                
-                # Adjust for ambient noise
-                self.logger.info("Adjusting for ambient noise...")
-                self.stt_sounddevice.adjust_for_ambient_noise(duration=1.0)
-                
-                self.logger.info("✅ Speech-to-text (sounddevice) initialized successfully")
-                return True
-            else:
-                # Fallback to regular STT
-                self.stt = SpeechToText()
-                
-                # Adjust for ambient noise
-                self.logger.info("Adjusting for ambient noise...")
-                self.stt.adjust_for_ambient_noise(duration=1.0)
-                
-                self.logger.info("✅ Speech-to-text initialized successfully")
-                return True
+            # Use sounddevice STT
+            self.stt = SoundDeviceSTT()
+            
+            # Adjust for ambient noise
+            self.logger.info("Adjusting for ambient noise...")
+            self.stt.adjust_for_ambient_noise(duration=1.0)
+            
+            self.logger.info("✅ Speech-to-text initialized successfully")
+            return True
             
         except Exception as e:
             self.logger.error(f"❌ Error initializing speech-to-text: {e}")

@@ -29,6 +29,9 @@ def test_pipeline():
         "what time is it",
         "volume up",
         "search for python",
+        "mute",
+        "set timer for 5 minutes",
+        "take a screenshot",
         "close firefox"
     ]
     

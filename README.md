@@ -6,9 +6,12 @@ A complete Python-based AI voice assistant with speech recognition, natural lang
 
 ### ✅ Fully Working
 - **Voice Recognition** - Speak commands naturally
-- **Intent Parsing** - Understands 12+ command types
+- **Wake Word Detection** - Hands-free activation
+- **Intent Parsing** - Understands 15+ command types
 - **App Control** - Open/close applications
 - **System Control** - Volume, screenshots, power management
+- **Timer Functionality** - Set countdown timers
+- **Text-to-Speech** - Voice responses (optional)
 - **Web Search** - Search the internet
 - **Time Queries** - Get current time
 - **Text Mode** - Type commands (no mic needed)
@@ -20,8 +23,10 @@ A complete Python-based AI voice assistant with speech recognition, natural lang
 - "search for python tutorials" - Web search
 - "what time is it" - Get current time
 - "volume up" / "volume down" - Control volume
-- "take a screenshot" - Capture screen
 - "mute" / "unmute" - Audio control
+- "take a screenshot" - Capture screen
+- "set timer for 5 minutes" - Set countdown timer
+- "lock screen" - Lock your computer
 
 ## 🚀 Quick Start
 
@@ -30,19 +35,19 @@ A complete Python-based AI voice assistant with speech recognition, natural lang
 python run_assistant.py
 ```
 
-This shows a menu with all available modes:
-1. Voice Assistant (Interactive)
-2. Text Assistant
-3. GUI Mode
-4. Test Voice Input
-5. Check System
+This shows a menu with all available modes.
 
-### Direct Commands
+### Hands-Free Mode (NEW!)
+```bash
+python voice_assistant_handsfree.py
+```
+Say "hey assistant" or "computer" to activate. Add `--no-tts` to disable voice responses.
 
-**Voice Assistant:**
+### Interactive Voice Mode
 ```bash
 python voice_assistant.py
 ```
+Press ENTER to speak. Add `--tts` to enable voice responses.
 
 **Text Assistant (No Microphone):**
 ```bash
@@ -181,12 +186,14 @@ python actions/system.py
 | CLOSE_APP | "close chrome" | Terminate application |
 | SEARCH | "search for cats" | Web search |
 | PLAY_MUSIC | "play music" | Open music player |
-| SET_TIMER | "timer for 5 minutes" | Set timer |
+| SET_TIMER | "timer for 5 minutes" | Set countdown timer ✨ NEW |
 | GET_WEATHER | "what's the weather" | Weather search |
 | GET_TIME | "what time is it" | Show current time |
 | VOLUME_UP | "volume up" | Increase volume |
 | VOLUME_DOWN | "volume down" | Decrease volume |
-| MUTE | "mute" | Mute audio |
+| MUTE | "mute" | Mute audio ✨ NEW |
+| UNMUTE | "unmute" | Unmute audio ✨ NEW |
+| LOCK_SCREEN | "lock screen" | Lock computer ✨ NEW |
 | TAKE_SCREENSHOT | "take a screenshot" | Capture screen |
 | SHUTDOWN | "shutdown" | Power off (with confirmation) |
 
