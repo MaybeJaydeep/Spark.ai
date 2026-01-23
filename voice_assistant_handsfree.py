@@ -33,7 +33,7 @@ class HandsFreeAssistant:
         self.tts = get_tts() if enable_tts else None
         self.enable_tts = enable_tts
         self.is_running = False
-        self.wake_words = wake_words or ["hey assistant", "computer"]
+        self.wake_words = wake_words or ["hey assistant", "spark"]
         
         # Setup logging
         logging.basicConfig(

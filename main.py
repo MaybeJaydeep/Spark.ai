@@ -309,11 +309,16 @@ def main():
     
     parser = argparse.ArgumentParser(description='AI Voice Assistant')
     parser.add_argument('--gui', action='store_true', help='Launch with graphical interface')
+    parser.add_argument('--gui-modern', action='store_true', help='Launch the modern graphical interface')
     args = parser.parse_args()
     
     try:
-        assistant = AIAssistant(use_gui=args.gui)
-        assistant.run()
+        if args.gui_modern:
+            from ui.modern_app import main as modern_main
+            modern_main()
+        else:
+            assistant = AIAssistant(use_gui=args.gui)
+            assistant.run()
     except Exception as e:
         logging.error(f"Fatal error: {e}")
         sys.exit(1)

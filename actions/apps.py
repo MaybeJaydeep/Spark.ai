@@ -63,6 +63,16 @@ class AppController:
                 "windows": "spotify.exe",
                 "linux": "spotify",
                 "darwin": "Spotify"
+            },
+            "vlc": {
+                "windows": "vlc.exe",
+                "linux": "vlc",
+                "darwin": "VLC"
+            },
+            "youtube": {
+                "windows": "chrome.exe",  # Opens YouTube in default browser
+                "linux": "google-chrome",
+                "darwin": "Google Chrome"
             }
         }
     
@@ -238,6 +248,26 @@ class AppController:
             return True
         except Exception as e:
             self.logger.error(f"Failed to open web search: {e}")
+            return False
+    
+    def search_youtube(self, query: str) -> bool:
+        """
+        Open a YouTube search in the default browser
+        
+        Args:
+            query: Search query
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            import webbrowser
+            search_url = f"https://www.youtube.com/results?search_query={query.replace(' ', '+')}"
+            webbrowser.open(search_url)
+            self.logger.info(f"Opened YouTube search for: {query}")
+            return True
+        except Exception as e:
+            self.logger.error(f"Failed to open YouTube search: {e}")
             return False
     
     def list_running_apps(self) -> List[str]:

@@ -16,9 +16,9 @@ def main():
     logging.basicConfig(level=logging.INFO)
     
     print("="*60)
-    print("🤖 AI ASSISTANT - TEXT MODE TESTER")
+    print("AI ASSISTANT - TEXT MODE TESTER")
     print("="*60)
-    print("\n💡 Type commands to test the assistant")
+    print("\nType commands to test the assistant")
     print("   Examples:")
     print("   - open firefox")
     print("   - open chrome")
@@ -37,7 +37,7 @@ def main():
     while True:
         try:
             # Get user input
-            command = input("\n🎤 You: ").strip()
+            command = input("\nYou: ").strip()
             
             if not command:
                 continue
@@ -66,10 +66,10 @@ def main():
             print("-"*60)
             
         except KeyboardInterrupt:
-            print("\n\n👋 Goodbye!")
+            print("\n\nGoodbye!")
             break
         except Exception as e:
-            print(f"\n❌ Error: {e}")
+            print(f"\nError: {e}")
             logging.exception("Error processing command")
 
 

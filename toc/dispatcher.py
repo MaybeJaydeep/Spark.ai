@@ -10,6 +10,9 @@ from nlp.intent_parser import Intent, IntentType
 from actions.apps import AppController
 from actions.system import SystemController
 from actions.timer import get_timer_manager
+import math
+import os
+import requests
 
 
 class CommandDispatcher:
@@ -59,6 +62,9 @@ class CommandDispatcher:
             
             elif intent.type == IntentType.GET_TIME:
                 return self._handle_get_time(intent)
+
+            elif intent.type == IntentType.CALCULATE:
+                return self._handle_calculate(intent)
             
             elif intent.type == IntentType.VOLUME_UP:
                 return self._handle_volume_up(intent)
@@ -77,6 +83,18 @@ class CommandDispatcher:
             
             elif intent.type == IntentType.TAKE_SCREENSHOT:
                 return self._handle_screenshot(intent)
+            
+            elif intent.type == IntentType.PLAY_MEDIA:
+                return self._handle_play_media(intent)
+            
+            elif intent.type == IntentType.PAUSE_MEDIA:
+                return self._handle_pause_media(intent)
+            
+            elif intent.type == IntentType.NEXT_TRACK:
+                return self._handle_next_track(intent)
+            
+            elif intent.type == IntentType.PREVIOUS_TRACK:
+                return self._handle_previous_track(intent)
             
             elif intent.type == IntentType.SHUTDOWN:
                 return self._handle_shutdown(intent)
@@ -251,22 +269,48 @@ class CommandDispatcher:
             }
     
     def _handle_get_weather(self, intent: Intent) -> dict:
-        """Handle get weather intent"""
+        """Handle get weather intent using OpenWeatherMap API if configured"""
+        api_key = os.getenv("OPENWEATHER_API_KEY")
         location_entity = intent.get_entity("location")
-        
-        if location_entity:
-            location = location_entity.value
-            query = f"weather in {location}"
-        else:
-            query = "weather"
-        
-        success = self.app_controller.search_web(query)
-        
-        return {
-            "success": success,
-            "message": f"Opening weather search" if success else "Failed to get weather",
-            "intent": intent.type.value
-        }
+        city = location_entity.value if location_entity else "London"
+
+        if not api_key:
+            # Fallback to browser-based search
+            query = f"weather in {city}"
+            success = self.app_controller.search_web(query)
+            return {
+                "success": success,
+                "message": f"Opening weather search for {city}" if success else "Failed to get weather",
+                "intent": intent.type.value,
+            }
+
+        try:
+            params = {"q": city, "appid": api_key, "units": "metric"}
+            resp = requests.get("https://api.openweathermap.org/data/2.5/weather", params=params, timeout=5)
+            resp.raise_for_status()
+            data = resp.json()
+
+            main = data.get("weather", [{}])[0].get("description", "").capitalize()
+            temp = data.get("main", {}).get("temp")
+            feels = data.get("main", {}).get("feels_like")
+
+            if temp is None:
+                raise ValueError("No temperature data")
+
+            msg = f"The weather in {city} is {main}, {temp:.1f}°C (feels like {feels:.1f}°C)."
+            return {
+                "success": True,
+                "message": msg,
+                "intent": intent.type.value,
+                "city": city,
+            }
+        except Exception as e:
+            self.logger.error(f"Weather API error: {e}")
+            return {
+                "success": False,
+                "message": f"Sorry, I couldn't fetch the weather for {city}",
+                "intent": intent.type.value,
+            }
     
     def _handle_get_time(self, intent: Intent) -> dict:
         """Handle get time intent"""
@@ -279,6 +323,46 @@ class CommandDispatcher:
             "intent": intent.type.value,
             "time": current_time
         }
+
+    def _handle_calculate(self, intent: Intent) -> dict:
+        """Handle quick math / calculation intent"""
+        expr_entity = intent.get_entity("expression")
+        if not expr_entity:
+            return {
+                "success": False,
+                "message": "No expression to calculate",
+                "intent": intent.type.value,
+            }
+
+        expression = expr_entity.value
+
+        # Very small, safe eval environment
+        allowed_names = {
+            k: getattr(math, k)
+            for k in ["sqrt", "sin", "cos", "tan", "log", "log10", "pi", "e"]
+        }
+        allowed_names["abs"] = abs
+        allowed_names["round"] = round
+
+        try:
+            # Disallow dangerous chars
+            if any(c in expression for c in ["__", ";", "{", "}", "[", "]"]):
+                raise ValueError("Invalid expression")
+
+            result = eval(expression, {"__builtins__": {}}, allowed_names)
+            return {
+                "success": True,
+                "message": f"{expression} = {result}",
+                "intent": intent.type.value,
+                "expression": expression,
+                "result": result,
+            }
+        except Exception:
+            return {
+                "success": False,
+                "message": f"Sorry, I couldn't calculate '{expression}'",
+                "intent": intent.type.value,
+            }
     
     def _handle_volume_up(self, intent: Intent) -> dict:
         """Handle volume up intent"""
@@ -339,6 +423,42 @@ class CommandDispatcher:
             "message": f"Screenshot saved to {filepath}" if success else "Failed to take screenshot",
             "intent": intent.type.value,
             "filepath": filepath if success else None
+        }
+    
+    def _handle_play_media(self, intent: Intent) -> dict:
+        """Handle play media intent"""
+        success = self.system_controller.play_media()
+        return {
+            "success": success,
+            "message": "Media playing" if success else "Failed to play media",
+            "intent": intent.type.value
+        }
+    
+    def _handle_pause_media(self, intent: Intent) -> dict:
+        """Handle pause media intent"""
+        success = self.system_controller.pause_media()
+        return {
+            "success": success,
+            "message": "Media paused" if success else "Failed to pause media",
+            "intent": intent.type.value
+        }
+    
+    def _handle_next_track(self, intent: Intent) -> dict:
+        """Handle next track intent"""
+        success = self.system_controller.next_track()
+        return {
+            "success": success,
+            "message": "Skipped to next track" if success else "Failed to skip track",
+            "intent": intent.type.value
+        }
+    
+    def _handle_previous_track(self, intent: Intent) -> dict:
+        """Handle previous track intent"""
+        success = self.system_controller.previous_track()
+        return {
+            "success": success,
+            "message": "Went to previous track" if success else "Failed to go to previous track",
+            "intent": intent.type.value
         }
     
     def _handle_shutdown(self, intent: Intent) -> dict:

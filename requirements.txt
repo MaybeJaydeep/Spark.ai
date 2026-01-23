@@ -1,7 +1,8 @@
 # Audio processing dependencies
-pyaudio>=0.2.11
 numpy>=1.24.0
 webrtcvad>=2.0.10
+sounddevice>=0.4.6
+soundfile>=0.12.1
 
 # Speech recognition
 SpeechRecognition>=3.10.0
@@ -12,12 +13,21 @@ colorlog>=6.7.0
 # Configuration management
 pyyaml>=6.0.0
 
+# HTTP / APIs
+requests>=2.32.0
+
 # GUI (tkinter is included with Python, but listed for reference)
 # tkinter - included with Python standard library
+
+# Modern GUI
+customtkinter>=5.2.2
 
 # Optional: Advanced wake word detection
 # porcupine-python>=3.0.0  # Uncomment for Picovoice Porcupine
 # pvrecorder>=1.2.1        # Uncomment for Picovoice audio recording
+
+# Optional legacy dependency (PyAudio). Not required when using sounddevice.
+# pyaudio>=0.2.11
 
 # Development dependencies
 pytest>=7.4.0
