@@ -97,31 +97,25 @@ def test_installation():
     
     try:
         # Test imports
-        import pyaudio
         import numpy
         import webrtcvad
+        import sounddevice
+        import soundfile
         print("✅ All required modules can be imported")
-        
-        # Test audio device access
-        p = pyaudio.PyAudio()
-        device_count = p.get_device_count()
-        print(f"✅ Found {device_count} audio devices")
-        
-        # Find input devices
-        input_devices = []
-        for i in range(device_count):
-            device_info = p.get_device_info_by_index(i)
-            if device_info['maxInputChannels'] > 0:
-                input_devices.append(device_info['name'])
-        
-        if input_devices:
-            print(f"✅ Found {len(input_devices)} input devices:")
-            for device in input_devices[:3]:  # Show first 3
-                print(f"   • {device}")
-        else:
-            print("⚠️  No audio input devices found")
-        
-        p.terminate()
+
+        # Test audio device access via sounddevice
+        try:
+            devices = sounddevice.query_devices()
+            input_devices = [d for d in devices if d.get("max_input_channels", 0) > 0]
+            print(f"✅ Found {len(devices)} audio devices ({len(input_devices)} inputs)")
+            if input_devices:
+                print("✅ Example input devices:")
+                for d in input_devices[:3]:
+                    print(f"   • {d.get('name')}")
+            else:
+                print("⚠️  No audio input devices found")
+        except Exception as e:
+            print(f"⚠️  Could not query audio devices: {e}")
         return True
         
     except ImportError as e:

@@ -452,6 +452,213 @@ class SystemController:
     
     # System Information
     
+    # Media Control
+    
+    def play_media(self) -> bool:
+        """Play/resume media (sends Play/Pause key)"""
+        try:
+            if self.system == "windows":
+                return self._play_media_windows()
+            elif self.system == "linux":
+                return self._play_media_linux()
+            elif self.system == "darwin":
+                return self._play_media_macos()
+            else:
+                return False
+        except Exception as e:
+            self.logger.error(f"Error playing media: {e}")
+            return False
+    
+    def pause_media(self) -> bool:
+        """Pause media (sends Play/Pause key - same as play, toggles)"""
+        return self.play_media()  # Play/Pause is a toggle
+    
+    def next_track(self) -> bool:
+        """Skip to next track"""
+        try:
+            if self.system == "windows":
+                return self._next_track_windows()
+            elif self.system == "linux":
+                return self._next_track_linux()
+            elif self.system == "darwin":
+                return self._next_track_macos()
+            else:
+                return False
+        except Exception as e:
+            self.logger.error(f"Error skipping to next track: {e}")
+            return False
+    
+    def previous_track(self) -> bool:
+        """Go to previous track"""
+        try:
+            if self.system == "windows":
+                return self._previous_track_windows()
+            elif self.system == "linux":
+                return self._previous_track_linux()
+            elif self.system == "darwin":
+                return self._previous_track_macos()
+            else:
+                return False
+        except Exception as e:
+            self.logger.error(f"Error going to previous track: {e}")
+            return False
+    
+    # Windows Media Control Methods
+    
+    def _play_media_windows(self) -> bool:
+        """Send Play/Pause media key on Windows"""
+        try:
+            # VK_MEDIA_PLAY_PAUSE = 0xB3
+            script = """
+            Add-Type -TypeDefinition @"
+            using System;
+            using System.Runtime.InteropServices;
+            public class MediaKeys {
+                [DllImport("user32.dll")]
+                public static extern void keybd_event(byte bVk, byte bScan, int dwFlags, int dwExtraInfo);
+                public static void PlayPause() {
+                    keybd_event(0xB3, 0, 0, 0);
+                    keybd_event(0xB3, 0, 2, 0);
+                }
+            }
+"@
+            [MediaKeys]::PlayPause()
+            """
+            subprocess.run(["powershell", "-Command", script], capture_output=True, timeout=2)
+            self.logger.info("Sent Play/Pause media key on Windows")
+            return True
+        except Exception as e:
+            self.logger.error(f"Windows play/pause failed: {e}")
+            # Fallback: try sending spacebar (works in many players)
+            try:
+                script = "(New-Object -ComObject WScript.Shell).SendKeys(' ')"
+                subprocess.run(["powershell", "-Command", script], capture_output=True, timeout=1)
+                return True
+            except:
+                return False
+    
+    def _next_track_windows(self) -> bool:
+        """Send Next Track media key on Windows"""
+        try:
+            # VK_MEDIA_NEXT_TRACK = 0xB0
+            script = """
+            Add-Type -TypeDefinition @"
+            using System;
+            using System.Runtime.InteropServices;
+            public class MediaKeys {
+                [DllImport("user32.dll")]
+                public static extern void keybd_event(byte bVk, byte bScan, int dwFlags, int dwExtraInfo);
+                public static void NextTrack() {
+                    keybd_event(0xB0, 0, 0, 0);
+                    keybd_event(0xB0, 0, 2, 0);
+                }
+            }
+"@
+            [MediaKeys]::NextTrack()
+            """
+            subprocess.run(["powershell", "-Command", script], capture_output=True, timeout=2)
+            self.logger.info("Sent Next Track media key on Windows")
+            return True
+        except Exception as e:
+            self.logger.error(f"Windows next track failed: {e}")
+            return False
+    
+    def _previous_track_windows(self) -> bool:
+        """Send Previous Track media key on Windows"""
+        try:
+            # VK_MEDIA_PREV_TRACK = 0xB1
+            script = """
+            Add-Type -TypeDefinition @"
+            using System;
+            using System.Runtime.InteropServices;
+            public class MediaKeys {
+                [DllImport("user32.dll")]
+                public static extern void keybd_event(byte bVk, byte bScan, int dwFlags, int dwExtraInfo);
+                public static void PrevTrack() {
+                    keybd_event(0xB1, 0, 0, 0);
+                    keybd_event(0xB1, 0, 2, 0);
+                }
+            }
+"@
+            [MediaKeys]::PrevTrack()
+            """
+            subprocess.run(["powershell", "-Command", script], capture_output=True, timeout=2)
+            self.logger.info("Sent Previous Track media key on Windows")
+            return True
+        except Exception as e:
+            self.logger.error(f"Windows previous track failed: {e}")
+            return False
+    
+    # Linux Media Control Methods
+    
+    def _play_media_linux(self) -> bool:
+        """Send Play/Pause on Linux using playerctl"""
+        try:
+            subprocess.run(["playerctl", "play-pause"], capture_output=True, timeout=2)
+            return True
+        except FileNotFoundError:
+            self.logger.warning("playerctl not found, media control unavailable")
+            return False
+        except Exception as e:
+            self.logger.error(f"Linux play/pause failed: {e}")
+            return False
+    
+    def _next_track_linux(self) -> bool:
+        """Send Next Track on Linux"""
+        try:
+            subprocess.run(["playerctl", "next"], capture_output=True, timeout=2)
+            return True
+        except FileNotFoundError:
+            return False
+        except Exception as e:
+            self.logger.error(f"Linux next track failed: {e}")
+            return False
+    
+    def _previous_track_linux(self) -> bool:
+        """Send Previous Track on Linux"""
+        try:
+            subprocess.run(["playerctl", "previous"], capture_output=True, timeout=2)
+            return True
+        except FileNotFoundError:
+            return False
+        except Exception as e:
+            self.logger.error(f"Linux previous track failed: {e}")
+            return False
+    
+    # macOS Media Control Methods
+    
+    def _play_media_macos(self) -> bool:
+        """Send Play/Pause on macOS"""
+        try:
+            subprocess.run(["osascript", "-e", "tell application \"System Events\" to key code 49"], 
+                         capture_output=True, timeout=2)
+            return True
+        except Exception as e:
+            self.logger.error(f"macOS play/pause failed: {e}")
+            return False
+    
+    def _next_track_macos(self) -> bool:
+        """Send Next Track on macOS"""
+        try:
+            subprocess.run(["osascript", "-e", "tell application \"System Events\" to key code 144"], 
+                         capture_output=True, timeout=2)
+            return True
+        except Exception as e:
+            self.logger.error(f"macOS next track failed: {e}")
+            return False
+    
+    def _previous_track_macos(self) -> bool:
+        """Send Previous Track on macOS"""
+        try:
+            subprocess.run(["osascript", "-e", "tell application \"System Events\" to key code 145"], 
+                         capture_output=True, timeout=2)
+            return True
+        except Exception as e:
+            self.logger.error(f"macOS previous track failed: {e}")
+            return False
+    
+    # System Information
+    
     def get_system_info(self) -> dict:
         """Get system information"""
         return {

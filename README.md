@@ -18,7 +18,7 @@ A complete Python-based AI voice assistant with speech recognition, natural lang
 - **GUI Interface** - Visual status and feedback
 
 ### 🎤 Voice Commands
-- "open firefox" - Launch applications
+- "open firefox" / "open vlc" - Launch applications
 - "close chrome" - Close applications
 - "search for python tutorials" - Web search
 - "what time is it" - Get current time
@@ -27,6 +27,17 @@ A complete Python-based AI voice assistant with speech recognition, natural lang
 - "take a screenshot" - Capture screen
 - "set timer for 5 minutes" - Set countdown timer
 - "lock screen" - Lock your computer
+- **Media Controls (NEW!):**
+  - "play video" / "resume" - Play/resume media in VLC or YouTube
+  - "pause video" - Pause media
+  - "next track" / "skip" - Skip to next track
+  - "previous track" / "back" - Go to previous track
+- **Quick Math (NEW!):**
+  - "calculate 23 * 45" - Get instant calculations
+  - "what is 10 / 3" - Math expressions
+- **Weather (NEW!):**
+  - "what's the weather" - Get weather (requires OPENWEATHER_API_KEY)
+  - "what's the weather in New York" - Weather for specific location
 
 ## 🚀 Quick Start
 
@@ -57,6 +68,11 @@ python test_assistant.py
 **GUI Mode:**
 ```bash
 python main.py --gui
+```
+
+**Modern GUI Mode (Recommended):**
+```bash
+python main.py --gui-modern
 ```
 
 **Test Voice:**
@@ -111,6 +127,12 @@ python test_assistant.py
 Visual interface with status indicators.
 ```bash
 python main.py --gui
+```
+
+### 5. Modern GUI Mode (Recommended)
+Modern UI with text + voice controls.
+```bash
+python main.py --gui-modern
 ```
 
 ## 🏗️ Architecture
@@ -195,6 +217,11 @@ python actions/system.py
 | UNMUTE | "unmute" | Unmute audio ✨ NEW |
 | LOCK_SCREEN | "lock screen" | Lock computer ✨ NEW |
 | TAKE_SCREENSHOT | "take a screenshot" | Capture screen |
+| PLAY_MEDIA | "play video" / "resume" | Play/resume media (VLC, YouTube, etc.) ✨ NEW |
+| PAUSE_MEDIA | "pause video" | Pause media ✨ NEW |
+| NEXT_TRACK | "next track" / "skip" | Skip to next track ✨ NEW |
+| PREVIOUS_TRACK | "previous track" / "back" | Go to previous track ✨ NEW |
+| CALCULATE | "calculate 23 * 45" | Quick math calculations ✨ NEW |
 | SHUTDOWN | "shutdown" | Power off (with confirmation) |
 
 ## 🛠️ Troubleshooting
@@ -284,6 +311,7 @@ For issues and questions:
 - Python 3.8 or higher
 - Microphone access
 - Audio drivers (PortAudio)
+- (Optional) Local LLM runtime (e.g. Ollama) for personalized chat
 
 ## 🛠️ Installation
 
@@ -300,10 +328,28 @@ For issues and questions:
    python setup.py
    ```
 
-3. **Start the assistant**
+3. **(Optional) Install as Windows startup app (hands-free mode)**
+   ```bash
+   python install_startup.py
+   ```
+   This will create a startup entry that launches the hands-free wake-word assistant automatically when you log in to Windows.
+
+4. **Start the assistant manually (if you don't use startup)**
    ```bash
    python main.py
    ```
+
+5. **(Optional) Enable local LLM for chat**
+- Install [Ollama](https://ollama.com) and pull a model, for example:
+  ```bash
+  ollama pull llama3.2
+  ```
+- Optionally set:
+  ```bash
+  set LLM_MODEL=llama3.2
+  set LLM_BASE_URL=http://localhost:11434
+  ```
+The assistant will then use the local LLM for open-ended, personalized conversation and as a fallback when a command intent is not recognized.
 
 ### Manual Installation
 

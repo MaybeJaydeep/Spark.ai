@@ -20,6 +20,7 @@ class IntentType(Enum):
     SET_TIMER = "set_timer"
     GET_WEATHER = "get_weather"
     GET_TIME = "get_time"
+    CALCULATE = "calculate"
     VOLUME_UP = "volume_up"
     VOLUME_DOWN = "volume_down"
     MUTE = "mute"
@@ -27,6 +28,10 @@ class IntentType(Enum):
     LOCK_SCREEN = "lock_screen"
     SHUTDOWN = "shutdown"
     TAKE_SCREENSHOT = "take_screenshot"
+    PLAY_MEDIA = "play_media"
+    PAUSE_MEDIA = "pause_media"
+    NEXT_TRACK = "next_track"
+    PREVIOUS_TRACK = "previous_track"
     UNKNOWN = "unknown"
 
 
@@ -104,6 +109,11 @@ class IntentParser:
                 "patterns": [r"(?:what's|what is)\s+the\s+time"],
                 "entity_types": []
             },
+            IntentType.CALCULATE.value: {
+                "keywords": ["calculate", "what is", "what's"],
+                "patterns": [r"(?:calculate|what is|what's)\s+(.+)"],
+                "entity_types": ["expression"]
+            },
             IntentType.VOLUME_UP.value: {
                 "keywords": ["volume up", "louder"],
                 "patterns": [r"volume\s+up"],
@@ -137,6 +147,26 @@ class IntentParser:
             IntentType.TAKE_SCREENSHOT.value: {
                 "keywords": ["screenshot", "screen capture"],
                 "patterns": [r"(?:take|capture)\s+(?:a\s+)?screenshot"],
+                "entity_types": []
+            },
+            IntentType.PLAY_MEDIA.value: {
+                "keywords": ["play", "resume", "play video", "play music"],
+                "patterns": [r"(?:play|resume)(?:\s+(?:video|music|media))?"],
+                "entity_types": []
+            },
+            IntentType.PAUSE_MEDIA.value: {
+                "keywords": ["pause", "pause video", "pause music"],
+                "patterns": [r"pause(?:\s+(?:video|music|media))?"],
+                "entity_types": []
+            },
+            IntentType.NEXT_TRACK.value: {
+                "keywords": ["next", "next track", "next song", "skip"],
+                "patterns": [r"(?:next|skip)(?:\s+(?:track|song))?"],
+                "entity_types": []
+            },
+            IntentType.PREVIOUS_TRACK.value: {
+                "keywords": ["previous", "previous track", "previous song", "back"],
+                "patterns": [r"(?:previous|back)(?:\s+(?:track|song))?"],
                 "entity_types": []
             },
         }
