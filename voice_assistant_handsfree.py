@@ -34,6 +34,8 @@ class HandsFreeAssistant:
         self.enable_tts = enable_tts
         self.is_running = False
         self.wake_words = wake_words or ["hey assistant", "spark"]
+        self.activation_count = 0  # Track wake word activations
+        self.session_start_time = time.time()  # Track session duration
         
         # Setup logging
         logging.basicConfig(
@@ -174,6 +176,16 @@ class HandsFreeAssistant:
         
         if self.wake_word_detector:
             self.wake_word_detector.stop()
+        
+        # Calculate session duration
+        session_duration = time.time() - self.session_start_time
+        
+        print(f"\n📊 Session Summary:")
+        print(f"   Duration: {session_duration/60:.1f} minutes")
+        print(f"   Wake word activations: {self.activation_count}")
+        if self.activation_count > 0:
+            avg_time = session_duration / self.activation_count / 60
+            print(f"   Average time between activations: {avg_time:.1f} minutes")
         
         print("\n👋 Goodbye!")
         self.logger.info("Hands-free assistant shutdown")
