@@ -47,6 +47,19 @@ def main():
                 print("\n👋 Goodbye!")
                 break
             
+            # Check for help command
+            if command.lower() in ['help', 'h', '?']:
+                print("\n📋 Available Commands:")
+                print("   App Control: open <app>, close <app>")
+                print("   System: volume up/down, mute/unmute, lock screen")
+                print("   Media: play video, pause video, next track")
+                print("   Productivity: set timer for X minutes, take screenshot")
+                print("   Information: what time is it, calculate X + Y")
+                print("   Search: search for <query>")
+                print("   Weather: what's the weather (in <city>)")
+                print("   Other: help, quit, exit")
+                continue
+            
             # Parse the command
             print(f"\n📝 Processing: '{command}'")
             intent = parser.parse(command)
