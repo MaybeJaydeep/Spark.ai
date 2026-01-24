@@ -21,6 +21,7 @@ class AppController:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.system = platform.system().lower()
+        self.app_launch_count = 0  # Track app launches for analytics
         
         # Common application mappings
         self.app_mappings = {
@@ -86,6 +87,7 @@ class AppController:
         Returns:
             True if successful, False otherwise
         """
+        self.app_launch_count += 1
         app_name_lower = app_name.lower().strip()
         
         # Get the executable name for this platform
