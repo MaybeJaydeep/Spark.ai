@@ -70,6 +70,8 @@ class IntentParser:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.patterns = self._init_patterns()
+        self._pattern_cache = {}  # Cache compiled regex patterns for performance
+        self._parse_count = 0  # Track number of parses for analytics
     
     def _init_patterns(self) -> Dict[str, Any]:
         """Initialize intent patterns"""
@@ -173,6 +175,8 @@ class IntentParser:
     
     def parse(self, text: str) -> Intent:
         """Parse text to extract intent and entities"""
+        self._parse_count += 1  # Track usage analytics
+        
         if not text or not text.strip():
             return Intent(
                 type=IntentType.UNKNOWN,

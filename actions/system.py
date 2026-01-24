@@ -23,6 +23,7 @@ class SystemController:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.system = platform.system().lower()
+        self.operation_count = 0  # Track number of operations for analytics
     
     # Volume Control
     
@@ -36,6 +37,7 @@ class SystemController:
         Returns:
             True if successful, False otherwise
         """
+        self.operation_count += 1
         try:
             if self.system == "windows":
                 return self._volume_up_windows(amount)
