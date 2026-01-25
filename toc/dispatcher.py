@@ -335,21 +335,37 @@ class CommandDispatcher:
             }
 
         expression = expr_entity.value
+        
+        # Validate expression for security
+        from validators import validate_math_expression
+        is_valid, error_msg = validate_math_expression(expression)
+        if not is_valid:
+            return {
+                "success": False,
+                "message": f"Invalid expression: {error_msg}",
+                "intent": intent.type.value,
+            }
 
         # Very small, safe eval environment
         allowed_names = {
             k: getattr(math, k)
-            for k in ["sqrt", "sin", "cos", "tan", "log", "log10", "pi", "e"]
+            for k in ["sqrt", "sin", "cos", "tan", "log", "log10", "pi", "e", "ceil", "floor"]
         }
         allowed_names["abs"] = abs
         allowed_names["round"] = round
+        allowed_names["min"] = min
+        allowed_names["max"] = max
 
         try:
-            # Disallow dangerous chars
-            if any(c in expression for c in ["__", ";", "{", "}", "[", "]"]):
-                raise ValueError("Invalid expression")
-
             result = eval(expression, {"__builtins__": {}}, allowed_names)
+            
+            # Format result nicely
+            if isinstance(result, float):
+                if result.is_integer():
+                    result = int(result)
+                else:
+                    result = round(result, 6)  # Limit decimal places
+            
             return {
                 "success": True,
                 "message": f"{expression} = {result}",
@@ -357,10 +373,10 @@ class CommandDispatcher:
                 "expression": expression,
                 "result": result,
             }
-        except Exception:
+        except Exception as e:
             return {
                 "success": False,
-                "message": f"Sorry, I couldn't calculate '{expression}'",
+                "message": f"Sorry, I couldn't calculate '{expression}': {str(e)}",
                 "intent": intent.type.value,
             }
     
