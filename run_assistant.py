@@ -35,11 +35,16 @@ def print_menu():
     print("   - Visual feedback")
     print("   - Status indicators")
     print()
-    print("5. 🧪 Test Voice Input")
+    print("5. 💼 Professional UI (NEW!)")
+    print("   - Industry-level interface")
+    print("   - Advanced analytics")
+    print("   - Multi-panel dashboard")
+    print()
+    print("6. 🧪 Test Voice Input")
     print("   - Test microphone")
     print("   - Single command test")
     print()
-    print("6. 📊 Check System")
+    print("7. 📊 Check System")
     print("   - Test all components")
     print("   - Check dependencies")
     print()
@@ -53,7 +58,7 @@ def main():
         print_menu()
         
         try:
-            choice = input("Enter your choice (0-6): ").strip()
+            choice = input("Enter your choice (0-7): ").strip()
             
             if choice == '0':
                 print("\n👋 Goodbye!")
@@ -80,17 +85,22 @@ def main():
                 os.system("python main.py --gui")
             
             elif choice == '5':
+                print("\n🚀 Starting Professional UI...")
+                print("="*60)
+                os.system("python run_professional_ui.py")
+            
+            elif choice == '6':
                 print("\n🚀 Testing Voice Input...")
                 print("="*60)
                 os.system("python test_voice.py")
             
-            elif choice == '6':
+            elif choice == '7':
                 print("\n🚀 Checking System...")
                 print("="*60)
                 os.system("python test_microphone.py")
             
             else:
-                print("\n❌ Invalid choice. Please enter 0-6.")
+                print("\n❌ Invalid choice. Please enter 0-7.")
                 continue
             
             # Wait for user
