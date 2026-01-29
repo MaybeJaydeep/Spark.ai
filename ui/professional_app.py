@@ -25,7 +25,7 @@ import json
 from datetime import datetime, timedelta
 from dataclasses import dataclass, asdict
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkinter
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg as FigureCanvasTkinter
 from matplotlib.figure import Figure
 import numpy as np
 from pathlib import Path

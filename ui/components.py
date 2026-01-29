@@ -15,7 +15,7 @@ from tkinter import ttk
 import customtkinter as ctk
 from typing import Dict, List, Optional, Callable, Any, Tuple
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkinter
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg as FigureCanvasTkinter
 from matplotlib.figure import Figure
 import numpy as np
 from datetime import datetime, timedelta
