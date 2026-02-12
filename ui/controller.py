@@ -25,7 +25,7 @@ from nlp.intent_parser import IntentType
 class AssistantSettings:
     enable_tts: bool = True
     enable_wake_word: bool = False
-    enable_llm: bool = True
+    enable_llm: bool = False  # Disabled by default (requires Ollama)
     wake_words: tuple[str, ...] = ("hey assistant", "computer")
     wake_word_confidence_threshold: float = 0.6
     stt_duration_seconds: float = 5.0
@@ -162,23 +162,19 @@ class AssistantController:
 
             # If not handled by command pipeline, fall back to local LLM chat
             if not handled and self._llm:
-                try:
-                    reply = self._chat_with_llm()
-                except Exception as e:
-                    text = str(e)
-                    # Common case: local LLM server (e.g. Ollama) not running
-                    if "failed to establish a new connection" in text.lower() or "actively refused" in text.lower():
-                        self._on_log("Local LLM is not reachable (e.g. Ollama not running on localhost:11434). I'll continue without chat mode.")
-                        # Disable LLM for the rest of this session to avoid repeated errors
-                        self._llm = None
-                    else:
-                        self._on_log(f"LLM error: {e}")
+                reply = self._chat_with_llm()
+                if reply:
+                    self._history.append({"role": "assistant", "content": reply})
+                    self._on_log(f"Spark: {reply}")
+                    if self.settings.enable_tts:
+                        self._tts.speak(reply)
                 else:
-                    if reply:
-                        self._history.append({"role": "assistant", "content": reply})
-                        self._on_log(f"Spark: {reply}")
-                        if self.settings.enable_tts:
-                            self._tts.speak(reply)
+                    # LLM not available or returned empty response
+                    if not handled:
+                        self._on_log("I couldn't understand that command. Try asking me to open an app, control volume, or set a timer.")
+            elif not handled:
+                # No LLM and command not handled
+                self._on_log("I couldn't understand that command. Try asking me to open an app, control volume, or set a timer.")
         except Exception as e:
             error_str = str(e).lower()
             if 'network' in error_str or 'connection' in error_str:
@@ -195,9 +191,10 @@ class AssistantController:
         Use local LLM as a conversational fallback / chat brain.
 
         Keeps a short rolling history for personalization and context.
+        Returns empty string if LLM is not available.
         """
         if not self._llm:
-            raise RuntimeError("LLM is disabled or not configured")
+            return ""
 
         # Keep last few exchanges to stay light-weight
         history = self._history[-8:]
