@@ -21,6 +21,9 @@ requests>=2.32.0
 
 # Modern GUI
 customtkinter>=5.2.2
+matplotlib>=3.7.0
+pillow>=10.0.0
+psutil>=5.9.0
 
 # Optional: Advanced wake word detection
 # porcupine-python>=3.0.0  # Uncomment for Picovoice Porcupine

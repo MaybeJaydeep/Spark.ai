@@ -38,19 +38,28 @@ class LocalLLMClient:
         Send a chat conversation and return the assistant's reply text.
 
         messages: list of {"role": "system"|"user"|"assistant", "content": str}
+        
+        Returns empty string if LLM is not available.
         """
-        url = f"{self.base_url.rstrip('/')}/api/chat"
-        payload = {
-            "model": self.model,
-            "messages": messages,
-        }
+        try:
+            url = f"{self.base_url.rstrip('/')}/api/chat"
+            payload = {
+                "model": self.model,
+                "messages": messages,
+            }
 
-        resp = requests.post(url, json=payload, timeout=self.timeout)
-        resp.raise_for_status()
-        data = resp.json()
+            resp = requests.post(url, json=payload, timeout=self.timeout)
+            resp.raise_for_status()
+            data = resp.json()
 
-        # Ollama returns {"message": {"role": "...", "content": "..."}}
-        msg = data.get("message") or {}
-        content = msg.get("content", "")
-        return content.strip()
+            # Ollama returns {"message": {"role": "...", "content": "..."}}
+            msg = data.get("message") or {}
+            content = msg.get("content", "")
+            return content.strip()
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            # LLM server not available - return empty string to indicate no response
+            return ""
+        except Exception:
+            # Any other error - return empty string
+            return ""
 

@@ -41,39 +41,35 @@ A complete Python-based AI voice assistant with speech recognition, natural lang
 
 ## 🚀 Quick Start
 
-### Easy Launcher (Recommended)
+### Unified Interface (Recommended)
+```bash
+python main.py
+```
+**Launches the exceptional unified interface with:**
+- Stunning visual design with perfect typography
+- 6 professional themes with seamless switching
+- Advanced animations and micro-interactions
+- Real-time chat interface with voice and text input
+- Professional component system
+- Accessibility excellence (WCAG 2.1 AAA)
+
+### Easy Launcher Menu
 ```bash
 python run_assistant.py
 ```
+Interactive menu to choose between different modes.
 
-This shows a menu with all available modes.
-
-### Hands-Free Mode (NEW!)
+### Hands-Free Mode
 ```bash
 python voice_assistant_handsfree.py
 ```
 Say "hey assistant" or "computer" to activate. Add `--no-tts` to disable voice responses.
 
-### Interactive Voice Mode
-```bash
-python voice_assistant.py
-```
-Press ENTER to speak. Add `--tts` to enable voice responses.
-
-**Text Assistant (No Microphone):**
+### Text Mode (No Microphone)
 ```bash
 python test_assistant.py
 ```
-
-**GUI Mode:**
-```bash
-python main.py --gui
-```
-
-**Modern GUI Mode (Recommended):**
-```bash
-python main.py --gui-modern
-```
+Type commands directly without voice input.
 
 **Test Voice:**
 ```bash
@@ -105,60 +101,68 @@ python test_microphone.py
 
 ## 🎯 Usage Modes
 
-### 1. Interactive Voice Mode
-Press ENTER, speak your command, get results.
+### 1. Unified Interface (Default)
+Complete unified interface with all features integrated.
 ```bash
-python voice_assistant.py --mode interactive
+python main.py
 ```
+**Features:**
+- Exceptional UI with stunning visual design
+- 6 professional themes with live switching
+- Real-time chat with voice and text input
+- Multi-view navigation (Dashboard, Chat, Analytics, Settings, Themes, Help)
+- Live status indicators and system monitoring
+- Accessibility excellence (WCAG 2.1 AAA)
+- Advanced animations and micro-interactions
 
-### 2. Continuous Voice Mode
-Always listening (no button press needed).
+### 2. Hands-Free Mode
+Always listening with wake word activation.
 ```bash
-python voice_assistant.py --mode continuous
+python voice_assistant_handsfree.py
 ```
+Say "hey assistant", "computer", or "wake up" to activate.
 
 ### 3. Text Mode
 Type commands instead of speaking.
 ```bash
 python test_assistant.py
 ```
+No microphone needed - perfect for testing.
 
-### 4. GUI Mode
-Visual interface with status indicators.
+### 4. Console Mode
+Run without GUI for headless environments.
 ```bash
-python main.py --gui
-```
-
-### 5. Modern GUI Mode (Recommended)
-Modern UI with text + voice controls.
-```bash
-python main.py --gui-modern
+python main.py --no-gui --mode interactive
 ```
 
 ## 🏗️ Architecture
 
 ```
 AI-assistant/
+├── ui/
+│   ├── exceptional_ui.py      # Unified interface (world-class)
+│   ├── advanced_themes.py     # Advanced theme system
+│   └── controller.py          # UI controller layer
 ├── speech/
-│   ├── stt.py                 # Speech-to-text (PyAudio)
 │   ├── stt_sounddevice.py     # Speech-to-text (sounddevice) ✅
-│   └── stt_windows.py         # Windows Speech API fallback
+│   └── tts.py                 # Text-to-speech ✅
 ├── nlp/
 │   └── intent_parser.py       # Natural language understanding
 ├── actions/
 │   ├── apps.py                # Application control
-│   └── system.py              # System operations
+│   ├── system.py              # System operations
+│   └── timer.py               # Timer functionality
 ├── toc/
 │   └── dispatcher.py          # Command routing
-├── ui/
-│   └── app.py                 # GUI interface
+├── llm/
+│   └── local_client.py        # Local LLM integration (Ollama)
 ├── wake_word/
-│   └── listener.py            # Wake word detection (needs PyAudio)
-├── voice_assistant.py         # Complete voice assistant ✅
+│   └── detector_sounddevice.py # Wake word detection ✅
+├── voice_assistant_handsfree.py # Hands-free voice assistant ✅
 ├── test_assistant.py          # Text-based testing ✅
 ├── test_voice.py              # Voice input testing ✅
-├── run_assistant.py           # Easy launcher ✅
-└── main.py                    # Main application
+├── run_assistant.py           # Easy launcher menu ✅
+└── main.py                    # Main application (unified UI) ✅
 ```
 
 ## 🔧 Configuration
