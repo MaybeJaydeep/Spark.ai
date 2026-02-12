@@ -311,18 +311,19 @@ def main():
     """Main entry point"""
     import argparse
     
-    parser = argparse.ArgumentParser(description='AI Voice Assistant')
-    parser.add_argument('--gui', action='store_true', help='Launch exceptional graphical interface')
-    parser.add_argument('--mode', type=str, choices=['interactive', 'continuous'], 
-                       default='interactive', help='Voice assistant mode')
+    parser = argparse.ArgumentParser(description='AI Voice Assistant - Unified Interface')
+    parser.add_argument('--mode', type=str, choices=['interactive', 'continuous', 'text'], 
+                       default='gui', help='Assistant mode (default: gui)')
+    parser.add_argument('--no-gui', action='store_true', help='Disable GUI and use console mode')
     args = parser.parse_args()
     
     try:
-        if args.gui:
-            # Launch exceptional UI
+        # Default to exceptional UI unless explicitly disabled
+        if not args.no_gui and args.mode == 'gui':
             from ui.exceptional_ui import main as exceptional_main
             exceptional_main()
         else:
+            # Console mode
             assistant = AIAssistant(use_gui=False)
             assistant.run()
     except Exception as e:
