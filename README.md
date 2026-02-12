@@ -48,17 +48,17 @@ python run_assistant.py
 
 This shows a menu with all available modes including the new **Professional UI**.
 
-### Professional UI (NEW! - Industry Level)
+### Exceptional UI (Recommended)
 ```bash
-python run_professional_ui.py
+python run_exceptional_ui.py
 ```
-**Industry-level interface with:**
-- Multi-panel dashboard with real-time analytics
-- Professional themes (Dark, Light, Corporate, High Contrast)
-- Advanced configuration and performance monitoring
-- Interactive charts and visualizations
-- Accessibility compliance (WCAG 2.1)
-- Command palette and keyboard shortcuts
+**World-class interface with:**
+- Stunning visual design with perfect typography
+- 6 professional themes with seamless switching
+- Advanced animations and micro-interactions
+- Real-time chat interface with voice and text input
+- Professional component system
+- Accessibility excellence (WCAG 2.1 AAA)
 
 ### Hands-Free Mode
 ```bash
@@ -68,7 +68,7 @@ Say "hey assistant" or "computer" to activate. Add `--no-tts` to disable voice r
 
 ### Interactive Voice Mode
 ```bash
-python voice_assistant.py
+python main.py --mode interactive
 ```
 Press ENTER to speak. Add `--tts` to enable voice responses.
 
@@ -82,16 +82,11 @@ python test_assistant.py
 python main.py --gui
 ```
 
-**Modern GUI Mode (Recommended):**
+**Exceptional UI (World-Class Interface):**
 ```bash
-python main.py --gui-modern
+python run_exceptional_ui.py
 ```
-
-**Professional UI (Industry Level - NEW!):**
-```bash
-python run_professional_ui.py
-```
-Complete professional interface with dashboard, analytics, and advanced features.
+Complete professional interface with advanced features.
 
 **Test Voice:**
 ```bash
@@ -186,7 +181,7 @@ AI-assistant/
 │   └── app.py                 # GUI interface
 ├── wake_word/
 │   └── listener.py            # Wake word detection (needs PyAudio)
-├── voice_assistant.py         # Complete voice assistant ✅
+├── voice_assistant_handsfree.py # Hands-free voice assistant ✅
 ├── test_assistant.py          # Text-based testing ✅
 ├── test_voice.py              # Voice input testing ✅
 ├── run_assistant.py           # Easy launcher ✅

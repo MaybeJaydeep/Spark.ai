@@ -23,16 +23,18 @@ AI-assistant/
 │   └── dispatcher.py          # Command routing & execution
 │
 ├── ui/                         # User interface
-│   └── app.py                 # GUI interface (tkinter)
+│   ├── exceptional_ui.py      # World-class professional interface ✨
+│   ├── advanced_themes.py     # Advanced theme system ✨
+│   └── controller.py          # UI controller layer ✨
 │
 ├── wake_word/                  # Wake word detection
 │   └── detector_sounddevice.py # Wake word detector using sounddevice
 │
-├── main.py                     # Main application (GUI + wake word)
-├── voice_assistant.py          # Interactive voice mode (press ENTER)
+├── main.py                     # Main application entry point
 ├── voice_assistant_handsfree.py # Hands-free mode (wake word activated)
 ├── test_assistant.py           # Text mode (type commands)
 ├── run_assistant.py            # Easy launcher menu
+├── run_exceptional_ui.py       # Exceptional UI launcher ✨
 │
 ├── test_integration.py         # Integration tests
 ├── test_microphone.py          # Audio system tests
@@ -60,7 +62,7 @@ Say "hey assistant" or "computer" to activate.
 
 ### 3. Interactive Voice Mode
 ```bash
-python voice_assistant.py
+python main.py --mode interactive
 ```
 Press ENTER to speak commands.
 

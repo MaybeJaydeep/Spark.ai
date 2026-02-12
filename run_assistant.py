@@ -35,21 +35,16 @@ def print_menu():
     print("   - Visual feedback")
     print("   - Status indicators")
     print()
-    print("5. 💼 Professional UI")
-    print("   - Industry-level interface")
-    print("   - Advanced analytics")
-    print("   - Multi-panel dashboard")
-    print()
-    print("6. ✨ Exceptional UI (NEW!)")
+    print("5. ✨ Exceptional UI")
     print("   - World-class interface")
     print("   - Perfect theme switching")
     print("   - Advanced animations")
     print()
-    print("7. 🧪 Test Voice Input")
+    print("6. 🧪 Test Voice Input")
     print("   - Test microphone")
     print("   - Single command test")
     print()
-    print("8. 📊 Check System")
+    print("7. 📊 Check System")
     print("   - Test all components")
     print("   - Check dependencies")
     print()
@@ -63,7 +58,7 @@ def main():
         print_menu()
         
         try:
-            choice = input("Enter your choice (0-8): ").strip()
+            choice = input("Enter your choice (0-7): ").strip()
             
             if choice == '0':
                 print("\n👋 Goodbye!")
@@ -72,7 +67,7 @@ def main():
             elif choice == '1':
                 print("\n🚀 Starting Voice Assistant (Interactive Mode)...")
                 print("="*60)
-                os.system("python voice_assistant.py --mode interactive")
+                os.system("python main.py --mode interactive")
             
             elif choice == '2':
                 print("\n🚀 Starting Hands-Free Mode...")
@@ -90,27 +85,22 @@ def main():
                 os.system("python main.py --gui")
             
             elif choice == '5':
-                print("\n🚀 Starting Professional UI...")
-                print("="*60)
-                os.system("python run_professional_ui.py")
-            
-            elif choice == '6':
                 print("\n🚀 Starting Exceptional UI...")
                 print("="*60)
                 os.system("python run_exceptional_ui.py")
             
-            elif choice == '7':
+            elif choice == '6':
                 print("\n🚀 Testing Voice Input...")
                 print("="*60)
                 os.system("python test_voice.py")
             
-            elif choice == '8':
+            elif choice == '7':
                 print("\n🚀 Checking System...")
                 print("="*60)
                 os.system("python test_microphone.py")
             
             else:
-                print("\n❌ Invalid choice. Please enter 0-8.")
+                print("\n❌ Invalid choice. Please enter 0-7.")
                 continue
             
             # Wait for user

@@ -23,10 +23,6 @@ import json
 import math
 from datetime import datetime, timedelta
 from dataclasses import dataclass, replace
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg as FigureCanvasTkinter
-from matplotlib.figure import Figure
-import numpy as np
 from pathlib import Path
 
 # Import our advanced systems
@@ -249,7 +245,6 @@ class ExceptionalUI(ctk.CTk):
         self._settings = AssistantSettings()
         self._current_view = "dashboard"
         self._chat_rows = 0
-        self._performance_data = {"cpu": [], "memory": [], "response_times": []}
         
         # Initialize controller with all callbacks
         self._controller = AssistantController(
@@ -1095,32 +1090,6 @@ class ExceptionalUI(ctk.CTk):
         """Update status indicator"""
         if key in self.status_indicators:
             self.status_indicators[key].configure(text=f"{label}: {status}")
-    
-    def _start_monitoring(self):
-        """Start performance monitoring"""
-        self.performance_monitor.start_system_monitoring()
-        threading.Thread(target=self._update_performance_data, daemon=True).start()
-    
-    def _update_performance_data(self):
-        """Update performance data in background"""
-        while True:
-            try:
-                import psutil
-                cpu_percent = psutil.cpu_percent()
-                memory_percent = psutil.virtual_memory().percent
-                
-                self._performance_data["cpu"].append(cpu_percent)
-                self._performance_data["memory"].append(memory_percent)
-                
-                # Keep only last 50 data points
-                if len(self._performance_data["cpu"]) > 50:
-                    self._performance_data["cpu"].pop(0)
-                    self._performance_data["memory"].pop(0)
-                
-                time.sleep(2)
-            except Exception as e:
-                print(f"Performance monitoring error: {e}")
-                time.sleep(5)
     
     def _update_ui(self):
         """Update UI with smooth animations"""

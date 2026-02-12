@@ -16,7 +16,6 @@ from wake_word.detector_sounddevice import SoundDeviceWakeWord, WakeWordEvent
 from speech.stt_sounddevice import SoundDeviceSTT, SOUNDDEVICE_AVAILABLE
 from nlp.intent_parser import IntentParser, Intent
 from toc.dispatcher import CommandDispatcher
-from ui.app import AssistantUI
 
 
 class AIAssistant:
@@ -27,7 +26,6 @@ class AIAssistant:
         self.stt: Optional[SoundDeviceSTT] = None
         self.intent_parser: Optional[IntentParser] = None
         self.dispatcher: Optional[CommandDispatcher] = None
-        self.ui: Optional[AssistantUI] = None
         self.use_gui = use_gui
         self.use_wake_word = use_wake_word
         self.is_running = False
@@ -191,9 +189,15 @@ class AIAssistant:
         """Execute action based on parsed intent"""
         print(f"\n🚀 Executing: {intent.type.value}")
         
-        # TODO: Implement actual action execution
-        # This will be handled by the actions module
-        print("   (Action execution not yet implemented)")
+        # Execute the intent using the dispatcher
+        if self.dispatcher:
+            result = self.dispatcher.dispatch(intent)
+            if result.get('success'):
+                print(f"   ✅ {result.get('message', 'Success')}")
+            else:
+                print(f"   ❌ {result.get('message', 'Failed')}")
+        else:
+            print("   ❌ Dispatcher not initialized")
         print("-" * 60)
     
     def run(self) -> None:
@@ -308,16 +312,18 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(description='AI Voice Assistant')
-    parser.add_argument('--gui', action='store_true', help='Launch with graphical interface')
-    parser.add_argument('--gui-modern', action='store_true', help='Launch the modern graphical interface')
+    parser.add_argument('--gui', action='store_true', help='Launch exceptional graphical interface')
+    parser.add_argument('--mode', type=str, choices=['interactive', 'continuous'], 
+                       default='interactive', help='Voice assistant mode')
     args = parser.parse_args()
     
     try:
-        if args.gui_modern:
-            from ui.modern_app import main as modern_main
-            modern_main()
+        if args.gui:
+            # Launch exceptional UI
+            from ui.exceptional_ui import main as exceptional_main
+            exceptional_main()
         else:
-            assistant = AIAssistant(use_gui=args.gui)
+            assistant = AIAssistant(use_gui=False)
             assistant.run()
     except Exception as e:
         logging.error(f"Fatal error: {e}")
