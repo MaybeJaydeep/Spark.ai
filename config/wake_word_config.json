@@ -1,9 +1,8 @@
 {
   "wake_words": [
-    "hey assistant",
-    "computer",
-    "wake up",
-    "hello assistant"
+    "hey spark",
+    "spark",
+    "hey assistant"
   ],
   "confidence_threshold": 0.7,
   "sample_rate": 16000,
