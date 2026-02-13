@@ -363,7 +363,7 @@ class ExceptionalUI(ctk.CTk):
         
         wake_hint = ctk.CTkLabel(
             control_frame, 
-            text='Wake words: "hey assistant", "computer"', 
+            text='Wake words: "hey spark", "spark"', 
             font=ctk.CTkFont(size=12),
             text_color=colors.get("text_secondary", ["#9aa4b2", "#9aa4b2"])
         )
@@ -749,7 +749,7 @@ class ExceptionalUI(ctk.CTk):
 🚀 Quick Start Guide:
 
 1. Click "Start Assistant" to begin voice recognition
-2. Use wake words: "hey assistant", "computer", "wake up"
+2. Use wake words: "hey spark", "spark"
 3. Speak commands naturally or type them in chat
 4. Monitor performance and analytics in dedicated tabs
 5. Customize settings and themes to your preferences

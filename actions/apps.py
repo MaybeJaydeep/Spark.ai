@@ -23,57 +23,122 @@ class AppController:
         self.system = platform.system().lower()
         self.app_launch_count = 0  # Track app launches for analytics
         
-        # Common application mappings
+        # Common application mappings (case-insensitive)
         self.app_mappings = {
             "chrome": {
-                "windows": "chrome.exe",
+                "windows": "chrome",
+                "linux": "google-chrome",
+                "darwin": "Google Chrome"
+            },
+            "google chrome": {
+                "windows": "chrome",
                 "linux": "google-chrome",
                 "darwin": "Google Chrome"
             },
             "firefox": {
-                "windows": "firefox.exe",
+                "windows": "firefox",
                 "linux": "firefox",
                 "darwin": "Firefox"
             },
             "edge": {
-                "windows": "msedge.exe",
+                "windows": "msedge",
+                "linux": "microsoft-edge",
+                "darwin": "Microsoft Edge"
+            },
+            "microsoft edge": {
+                "windows": "msedge",
                 "linux": "microsoft-edge",
                 "darwin": "Microsoft Edge"
             },
             "notepad": {
-                "windows": "notepad.exe",
+                "windows": "notepad",
                 "linux": "gedit",
                 "darwin": "TextEdit"
             },
             "calculator": {
-                "windows": "calc.exe",
+                "windows": "calc",
+                "linux": "gnome-calculator",
+                "darwin": "Calculator"
+            },
+            "calc": {
+                "windows": "calc",
                 "linux": "gnome-calculator",
                 "darwin": "Calculator"
             },
             "terminal": {
-                "windows": "cmd.exe",
+                "windows": "cmd",
+                "linux": "gnome-terminal",
+                "darwin": "Terminal"
+            },
+            "cmd": {
+                "windows": "cmd",
+                "linux": "gnome-terminal",
+                "darwin": "Terminal"
+            },
+            "command prompt": {
+                "windows": "cmd",
                 "linux": "gnome-terminal",
                 "darwin": "Terminal"
             },
             "vscode": {
-                "windows": "code.exe",
+                "windows": "code",
+                "linux": "code",
+                "darwin": "Visual Studio Code"
+            },
+            "visual studio code": {
+                "windows": "code",
                 "linux": "code",
                 "darwin": "Visual Studio Code"
             },
             "spotify": {
-                "windows": "spotify.exe",
+                "windows": "spotify",
                 "linux": "spotify",
                 "darwin": "Spotify"
             },
             "vlc": {
-                "windows": "vlc.exe",
+                "windows": "vlc",
                 "linux": "vlc",
                 "darwin": "VLC"
             },
             "youtube": {
-                "windows": "chrome.exe",  # Opens YouTube in default browser
+                "windows": "chrome",
                 "linux": "google-chrome",
                 "darwin": "Google Chrome"
+            },
+            "word": {
+                "windows": "winword",
+                "linux": "libreoffice",
+                "darwin": "Microsoft Word"
+            },
+            "excel": {
+                "windows": "excel",
+                "linux": "libreoffice",
+                "darwin": "Microsoft Excel"
+            },
+            "powerpoint": {
+                "windows": "powerpnt",
+                "linux": "libreoffice",
+                "darwin": "Microsoft PowerPoint"
+            },
+            "outlook": {
+                "windows": "outlook",
+                "linux": "thunderbird",
+                "darwin": "Microsoft Outlook"
+            },
+            "paint": {
+                "windows": "mspaint",
+                "linux": "gimp",
+                "darwin": "Preview"
+            },
+            "file explorer": {
+                "windows": "explorer",
+                "linux": "nautilus",
+                "darwin": "Finder"
+            },
+            "explorer": {
+                "windows": "explorer",
+                "linux": "nautilus",
+                "darwin": "Finder"
             }
         }
     
@@ -122,13 +187,25 @@ class AppController:
     def _open_windows(self, executable: str) -> bool:
         """Open application on Windows"""
         try:
+            # Remove .exe if present to avoid duplication
+            exe_name = executable.lower()
+            if not exe_name.endswith('.exe'):
+                exe_name = exe_name + '.exe'
+            
             # Try using start command (works for most apps)
-            subprocess.Popen(["start", executable], shell=True)
-            self.logger.info(f"Opened {executable} on Windows")
+            # Use shell=True to allow Windows to find the app in PATH
+            subprocess.Popen(f'start "" "{exe_name}"', shell=True)
+            self.logger.info(f"Opened {exe_name} on Windows")
             return True
         except Exception as e:
-            self.logger.error(f"Failed to open on Windows: {e}")
-            return False
+            # Try without .exe extension
+            try:
+                subprocess.Popen(f'start "" "{executable}"', shell=True)
+                self.logger.info(f"Opened {executable} on Windows")
+                return True
+            except Exception as e2:
+                self.logger.error(f"Failed to open on Windows: {e}, {e2}")
+                return False
     
     def _open_linux(self, executable: str) -> bool:
         """Open application on Linux"""

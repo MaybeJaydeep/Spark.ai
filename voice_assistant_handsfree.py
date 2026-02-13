@@ -33,7 +33,7 @@ class HandsFreeAssistant:
         self.tts = get_tts() if enable_tts else None
         self.enable_tts = enable_tts
         self.is_running = False
-        self.wake_words = wake_words or ["hey assistant", "spark"]
+        self.wake_words = wake_words or ["hey spark", "spark"]
         self.activation_count = 0  # Track wake word activations
         self.session_start_time = time.time()  # Track session duration
         

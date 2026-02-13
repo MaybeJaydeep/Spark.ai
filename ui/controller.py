@@ -26,7 +26,7 @@ class AssistantSettings:
     enable_tts: bool = True
     enable_wake_word: bool = False
     enable_llm: bool = False  # Disabled by default (requires Ollama)
-    wake_words: tuple[str, ...] = ("hey assistant", "computer")
+    wake_words: tuple[str, ...] = ("hey spark", "spark")
     wake_word_confidence_threshold: float = 0.6
     stt_duration_seconds: float = 5.0
     stt_retry_on_failure: int = 1  # retry once on STT failure
